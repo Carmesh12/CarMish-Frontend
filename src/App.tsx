@@ -1,8 +1,24 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { LoginRoute } from './features/auth/routes/LoginRoute';
+import { SignupRoute } from './features/auth/routes/SignupRoute';
+import { DashboardRoute } from './features/dashboard/routes/DashboardRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
   return (
-    <LoginRoute />
+    <Routes>
+      <Route path="/login" element={<LoginRoute />} />
+      <Route path="/signup" element={<SignupRoute />} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardRoute />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   )
 }
 

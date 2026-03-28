@@ -4,15 +4,27 @@ interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
 }
 
-export const InputField: React.FC<InputFieldProps> = ({ label, id, ...props }) => {
+export const InputField: React.FC<InputFieldProps> = ({ label, id, className, ...props }) => {
   return (
     <div className="flex flex-col mb-4">
-      <label htmlFor={id} className="mb-2 text-sm font-semibold text-[#1A2238]">
+      <label
+        htmlFor={id}
+        className="mb-2 text-xs font-medium uppercase tracking-wider text-mesh-muted"
+      >
         {label}
       </label>
       <input
         id={id}
-        className="px-4 py-3 rounded-md border border-[#E0E0E0] bg-white text-[#1A2238] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#007BFF] focus:border-transparent transition-all duration-200"
+        className={[
+          'w-full px-4 py-3 rounded-[var(--radius-mesh-sm)] border border-mesh-border bg-mesh-surface',
+          'text-mesh-text placeholder:text-mesh-muted/60',
+          'transition-[border-color,box-shadow] duration-200',
+          'focus:outline-none focus:border-mesh-gold/70 focus:ring-1 focus:ring-mesh-gold/35',
+          'disabled:opacity-50 disabled:cursor-not-allowed',
+          className ?? '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         {...props}
       />
     </div>
