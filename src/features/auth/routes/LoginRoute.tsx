@@ -94,9 +94,12 @@ export const LoginRoute: React.FC = () => {
           />
 
           <div className="flex justify-end mb-6">
-            <span className="text-sm text-mesh-muted cursor-not-allowed" title="Coming soon">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-mesh-gold hover:text-mesh-gold-hover transition-colors"
+            >
               Forgot password?
-            </span>
+            </Link>
           </div>
 
           <button
