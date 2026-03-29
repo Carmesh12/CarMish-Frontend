@@ -4,6 +4,8 @@ import { SignupRoute } from './features/auth/routes/SignupRoute';
 import { ForgotPasswordRoute } from './features/auth/routes/ForgotPasswordRoute';
 import { ResetPasswordRoute } from './features/auth/routes/ResetPasswordRoute';
 import { DashboardRoute } from './features/dashboard/routes/DashboardRoute';
+import { AccountDashboardRoute } from './features/user-account/routes/AccountDashboardRoute';
+import { AccountProfileRoute } from './features/user-account/routes/AccountProfileRoute';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 function App() {
@@ -18,6 +20,22 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardRoute />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account"
+        element={
+          <ProtectedRoute>
+            <AccountDashboardRoute />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account/profile"
+        element={
+          <ProtectedRoute>
+            <AccountProfileRoute />
           </ProtectedRoute>
         }
       />

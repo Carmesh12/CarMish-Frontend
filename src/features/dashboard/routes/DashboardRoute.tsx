@@ -1,43 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  notifyDismiss,
-  notifyInfo,
-  notifyLoading,
-  notifySuccess,
-  notifyWarning,
-} from '../../../lib/toast';
+import { notifyInfo } from '../../../lib/toast';
+import { performLogout } from '../../../lib/logout';
 
 export const DashboardRoute = () => {
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    const toastId = notifyLoading('Signing you out…');
-    const refreshToken = localStorage.getItem('refreshToken');
-
-    void (async () => {
-      try {
-        if (refreshToken) {
-          const res = await fetch('http://localhost:3000/auth/logout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refreshToken }),
-          });
-          if (!res.ok) {
-            throw new Error('Server could not revoke session');
-          }
-        }
-        notifyDismiss(toastId);
-        notifySuccess('You have been signed out.');
-      } catch {
-        notifyDismiss(toastId);
-        notifyWarning('You are signed out on this device. The server may not have been reached.');
-      } finally {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        navigate('/login', { replace: true });
-      }
-    })();
-  };
 
   return (
     <div className="min-h-screen bg-mesh-bg flex flex-col">
@@ -64,9 +30,15 @@ export const DashboardRoute = () => {
             >
               Home
             </Link>
+            <Link
+              to="/account"
+              className="text-mesh-muted hover:text-mesh-text transition-colors"
+            >
+              My account
+            </Link>
             <button
               type="button"
-              onClick={handleLogout}
+              onClick={() => performLogout(navigate)}
               className="py-2 px-4 rounded-[var(--radius-mesh-sm)] text-sm font-medium bg-mesh-gold text-[#111111] hover:bg-mesh-gold-hover transition-colors"
             >
               Sign out
