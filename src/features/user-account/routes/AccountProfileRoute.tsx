@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { InputField } from '../../auth/components/InputField';
 import {
-  deleteUserProfilePhoto,
   getUserProfile,
   patchUserPassword,
   patchUserProfile,
-  postUserProfilePhoto,
+  patchUserProfileImage,
 } from '../api/userProfileApi';
 import type { UserProfileResponse } from '../types';
 import { AccountLayout } from '../components/AccountLayout';
@@ -74,7 +73,7 @@ export function AccountProfileRoute() {
     e.target.value = '';
     if (!file || !profile) return;
     setPhotoUploading(true);
-    const task = postUserProfilePhoto(file);
+    const task = patchUserProfileImage(file);
     void notifyPromise(task, {
       pending: 'Uploading photo…',
       success: 'Profile photo updated.',
@@ -84,25 +83,13 @@ export function AccountProfileRoute() {
         },
       },
     })
-      .then((updated) => applyProfileToForm(updated))
-      .catch(() => {})
-      .finally(() => setPhotoUploading(false));
-  };
-
-  const handleRemovePhoto = () => {
-    if (!profile) return;
-    setPhotoUploading(true);
-    const task = deleteUserProfilePhoto();
-    void notifyPromise(task, {
-      pending: 'Removing photo…',
-      success: 'Profile photo removed.',
-      error: {
-        render({ data }) {
-          return data instanceof Error ? data.message : 'Could not remove photo';
-        },
-      },
-    })
-      .then((updated) => applyProfileToForm(updated))
+      .then((res) => {
+        applyProfileToForm({
+          ...profile,
+          profileImageUrl: res.profileImageUrl,
+          profileUpdatedAt: new Date().toISOString(),
+        });
+      })
       .catch(() => {})
       .finally(() => setPhotoUploading(false));
   };
@@ -237,16 +224,6 @@ export function AccountProfileRoute() {
                 >
                   {photoUploading ? 'Please wait…' : 'Choose image'}
                 </button>
-                {resolveMediaUrl(profile.profileImageUrl) ? (
-                  <button
-                    type="button"
-                    disabled={photoUploading}
-                    onClick={handleRemovePhoto}
-                    className="self-start text-sm text-mesh-muted hover:text-mesh-text transition-colors disabled:opacity-50"
-                  >
-                    Remove photo
-                  </button>
-                ) : null}
                 <p className="text-xs text-mesh-muted max-w-md">
                   JPEG, PNG, WebP, or GIF. Maximum file size 5 MB.
                 </p>

@@ -1,9 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { getRoleFromAccessToken } from '../../../lib/jwtRole';
 import { notifyInfo } from '../../../lib/toast';
 import { performLogout } from '../../../lib/logout';
 
 export const DashboardRoute = () => {
   const navigate = useNavigate();
+  const role = getRoleFromAccessToken();
 
   return (
     <div className="min-h-screen bg-mesh-bg flex flex-col">
@@ -30,12 +32,30 @@ export const DashboardRoute = () => {
             >
               Home
             </Link>
-            <Link
-              to="/account"
-              className="text-mesh-muted hover:text-mesh-text transition-colors"
-            >
-              My account
-            </Link>
+            {role === 'USER' ? (
+              <Link
+                to="/account"
+                className="text-mesh-muted hover:text-mesh-text transition-colors"
+              >
+                My account
+              </Link>
+            ) : null}
+            {role === 'VENDOR' ? (
+              <Link
+                to="/vendor/dashboard"
+                className="text-mesh-muted hover:text-mesh-text transition-colors"
+              >
+                Vendor account
+              </Link>
+            ) : null}
+            {role === 'ADMIN' ? (
+              <Link
+                to="/admin/dashboard"
+                className="text-mesh-muted hover:text-mesh-text transition-colors"
+              >
+                Admin account
+              </Link>
+            ) : null}
             <button
               type="button"
               onClick={() => performLogout(navigate)}

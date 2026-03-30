@@ -20,17 +20,16 @@ export function patchUserProfile(body: {
   });
 }
 
-export function postUserProfilePhoto(file: File) {
-  const formData = new FormData();
-  formData.append('file', file);
-  return authFormData<UserProfileResponse>('/user/profile/photo', formData, {
-    method: 'POST',
-  });
-}
+export type ProfileImageUploadResponse = {
+  message: string;
+  profileImageUrl: string;
+};
 
-export function deleteUserProfilePhoto() {
-  return authJson<UserProfileResponse>('/user/profile/photo', {
-    method: 'DELETE',
+export function patchUserProfileImage(file: File) {
+  const formData = new FormData();
+  formData.append('image', file);
+  return authFormData<ProfileImageUploadResponse>('/user/profile/image', formData, {
+    method: 'PATCH',
   });
 }
 
