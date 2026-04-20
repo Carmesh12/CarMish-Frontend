@@ -3,24 +3,41 @@
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 
-  --color-mesh-bg: #111111;
-  --color-mesh-surface: #1e1e1e;
-  --color-mesh-card: #242424;
-  --color-mesh-text: #f5f5f5;
-  --color-mesh-muted: #b3b3b3;
-  --color-mesh-gold: #c8a96b;
-  --color-mesh-gold-hover: #d9b16e;
-  --color-mesh-border: #333333;
+  /* ── Core palette (deeper blacks with blue undertone) ── */
+  --color-mesh-bg: #070b14; /* deep space navy */
+  --color-mesh-surface: #0b1220;
+  --color-mesh-card: #0f1a2f;
+  --color-mesh-text: #eef3ff;
+  --color-mesh-muted: #9aa7c2;
+  --color-mesh-border: rgba(238, 243, 255, 0.08);
 
-  --radius-mesh: 10px;
-  --radius-mesh-sm: 8px;
-  --shadow-mesh-card: 0 16px 48px rgba(0, 0, 0, 0.35);
-  --shadow-mesh-soft: 0 8px 24px rgba(0, 0, 0, 0.25);
+  /* ── Accent: gold ── */
+  --color-mesh-gold: #e7c06b; /* softer gold */
+  --color-mesh-gold-hover: #f0d08a;
+
+  /* ── Accent: teal ── */
+  --color-mesh-accent: #46d8ff; /* airy cyan */
+  --color-mesh-accent-hover: #7be8ff;
+
+  /* ── Glass tokens ── */
+  --color-mesh-glass: rgba(238, 243, 255, 0.04);
+  --color-mesh-glass-heavy: rgba(238, 243, 255, 0.07);
+  --color-mesh-glass-border: rgba(238, 243, 255, 0.09);
+
+  /* ── Radius / shadows ── */
+  --radius-mesh: 14px;
+  --radius-mesh-sm: 10px;
+  --shadow-mesh-card: 0 20px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(238, 243, 255, 0.04);
+  --shadow-mesh-soft: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-mesh-glow-gold: 0 0 26px rgba(231, 192, 107, 0.18);
+  --shadow-mesh-glow-accent: 0 0 26px rgba(70, 216, 255, 0.16);
 }
 
+/* ── Base ── */
 @layer base {
   html {
     @apply antialiased;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -31,49 +48,207 @@
   #root {
     @apply min-h-screen;
   }
+
+  ::selection {
+    background: rgba(231, 192, 107, 0.22);
+    color: #eef3ff;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid rgba(231, 192, 107, 0.45);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
 }
 
-/* React-Toastify base import overrides */
+/* ── Glass utilities ── */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-heavy {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ── Gradient mesh background ── */
+.mesh-gradient-bg {
+  position: relative;
+  overflow: hidden;
+}
+.mesh-gradient-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 50% 50% at 15% 20%, rgba(70, 216, 255, 0.09) 0%, transparent 72%),
+    radial-gradient(ellipse 40% 40% at 85% 75%, rgba(167, 139, 250, 0.07) 0%, transparent 72%),
+    radial-gradient(ellipse 35% 35% at 50% 10%, rgba(231, 192, 107, 0.06) 0%, transparent 72%);
+  animation: meshFloat 20s ease-in-out infinite alternate;
+}
+
+/* ── Auth page floating orbs ── */
+.auth-mesh-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 45% at 20% 30%, rgba(70, 216, 255, 0.12) 0%, transparent 72%),
+    radial-gradient(ellipse 50% 50% at 80% 70%, rgba(167, 139, 250, 0.11) 0%, transparent 72%),
+    radial-gradient(ellipse 40% 40% at 60% 15%, rgba(231, 192, 107, 0.09) 0%, transparent 72%),
+    radial-gradient(ellipse 30% 30% at 40% 90%, rgba(70, 216, 255, 0.07) 0%, transparent 72%);
+  animation: meshFloat 15s ease-in-out infinite alternate;
+}
+
+@keyframes meshFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10px, 8px) scale(1.02); }
+  100% { transform: translate(5px, -5px) scale(0.98); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Glow effects ── */
+.glow-gold {
+  box-shadow: 0 0 22px rgba(231, 192, 107, 0.20), 0 0 0 1px rgba(231, 192, 107, 0.10);
+}
+.glow-gold-sm {
+  box-shadow: 0 0 12px rgba(231, 192, 107, 0.16);
+}
+.glow-accent {
+  box-shadow: 0 0 22px rgba(70, 216, 255, 0.16), 0 0 0 1px rgba(70, 216, 255, 0.10);
+}
+
+/* ── Gradient text ── */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #e7c06b, #f0d08a, #e7c06b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-accent {
+  background: linear-gradient(135deg, #46d8ff, #7be8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-gradient-mixed {
+  background: linear-gradient(135deg, #e7c06b, #46d8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Gradient border utility ── */
+.border-gradient-gold {
+  border: 1px solid transparent;
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(var(--color-mesh-card), var(--color-mesh-card)),
+    linear-gradient(135deg, rgba(231, 192, 107, 0.35), rgba(70, 216, 255, 0.18), rgba(167, 139, 250, 0.12));
+}
+
+/* ── Card hover shine effect ── */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.card-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.03) 45%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.03) 55%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+.card-shine:hover::after {
+  opacity: 1;
+}
+
+/* ── React-Toastify overrides ── */
 @import "react-toastify/dist/ReactToastify.css";
 
 .mesh-toast.Toastify__toast {
-  background: #242424 !important;
-  color: #f5f5f5 !important;
-  border: 1px solid #333333 !important;
-  border-radius: 10px !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45) !important;
+  background: rgba(15, 26, 47, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  color: #eef3ff !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4) !important;
   font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif !important;
-  padding: 14px 16px !important;
+  padding: 14px 18px !important;
   min-height: auto !important;
 }
 
 .mesh-toast.Toastify__toast .Toastify__toast-body {
   padding: 0 !important;
   font-size: 0.875rem !important;
-  line-height: 1.45 !important;
-  color: #f5f5f5 !important;
+  line-height: 1.5 !important;
+  color: #eef3ff !important;
 }
 
 .mesh-toast.Toastify__toast .Toastify__progress-bar {
-  background: #c8a96b !important;
-  height: 3px !important;
+  background: linear-gradient(90deg, #e7c06b, #f0d08a) !important;
+  height: 2px !important;
 }
 
 .Toastify__toast--success.mesh-toast .Toastify__progress-bar {
-  background: #c8a96b !important;
+  background: linear-gradient(90deg, #34d399, #6ee7b7) !important;
 }
 
 .Toastify__toast--error.mesh-toast .Toastify__progress-bar {
-  background: #b85c5c !important;
+  background: linear-gradient(90deg, #f87171, #fca5a5) !important;
 }
 
 .Toastify__toast--warning.mesh-toast .Toastify__progress-bar {
-  background: #c8a96b !important;
-  opacity: 0.85;
+  background: linear-gradient(90deg, #e7c06b, #f0d08a) !important;
 }
 
 .Toastify__toast--info.mesh-toast .Toastify__progress-bar {
-  background: #8a8a8a !important;
+  background: linear-gradient(90deg, #46d8ff, #7be8ff) !important;
 }
 
 .Toastify__toast-icon {
@@ -81,10 +256,10 @@
 }
 
 .Toastify__close-button {
-  color: #b3b3b3 !important;
+  color: #8a8a9a !important;
   opacity: 1 !important;
 }
 
 .Toastify__close-button:hover {
-  color: #c8a96b !important;
+  color: #e7c06b !important;
 }

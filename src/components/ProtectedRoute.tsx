@@ -1,11 +1,9 @@
 import { Navigate } from 'react-router-dom';
+import { useAuthStore } from '../stores/authStore';
+import type { ReactNode } from 'react';
 
-export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem('accessToken');
-
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
+export function ProtectedRoute({ children }: { children: ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}

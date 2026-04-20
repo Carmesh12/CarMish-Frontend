@@ -1,27 +1,20 @@
-import type { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import {
-  getAccountHomePath,
-  getRoleFromAccessToken,
-  type AccountRole,
-} from '../lib/jwtRole';
+import { useAuthStore, getAccountHomePath } from '../stores/authStore';
+import type { AccountRole } from '../stores/authStore';
+import type { ReactNode } from 'react';
 
-type RoleProtectedRouteProps = {
+interface Props {
   role: AccountRole;
   children: ReactNode;
-};
+}
 
-export function RoleProtectedRoute({ role, children }: RoleProtectedRouteProps) {
-  const token = localStorage.getItem('accessToken');
-  if (!token) {
-    return <Navigate to="/login" replace />;
+export function RoleProtectedRoute({ role, children }: Props) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const currentRole = useAuthStore((s) => s.role);
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (currentRole !== role) {
+    return <Navigate to={getAccountHomePath(currentRole)} replace />;
   }
-  const actual = getRoleFromAccessToken();
-  if (!actual) {
-    return <Navigate to="/login" replace />;
-  }
-  if (actual !== role) {
-    return <Navigate to={getAccountHomePath(actual)} replace />;
-  }
-  return children;
+  return <>{children}</>;
 }
