@@ -71,68 +71,127 @@ export function SignupPage() {
   };
 
   return (
-    <Card>
-      <div className="text-center mb-6">
-        <h1 className="text-2xl font-bold text-mesh-text">{t('auth.signup')}</h1>
-        <p className="text-sm text-mesh-muted mt-1">{t('auth.signupSubtitle')}</p>
-      </div>
-
-      <div className="flex rounded-[var(--radius-mesh-sm)] border border-mesh-border mb-6 overflow-hidden">
-        <button
-          type="button"
-          onClick={() => switchTab(false)}
-          className={`flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-            !isVendor ? 'bg-mesh-gold text-mesh-bg' : 'text-mesh-muted hover:text-mesh-text'
-          }`}
-        >
-          {t('auth.signupAsUser')}
-        </button>
-        <button
-          type="button"
-          onClick={() => switchTab(true)}
-          className={`flex-1 py-2.5 text-sm font-medium transition-colors cursor-pointer ${
-            isVendor ? 'bg-mesh-gold text-mesh-bg' : 'text-mesh-muted hover:text-mesh-text'
-          }`}
-        >
-          {t('auth.signupAsVendor')}
-        </button>
-      </div>
-
-      {!isVendor ? (
-        <form onSubmit={userForm.handleSubmit(onSubmitUser)} className="space-y-4">
-          <Input label={t('auth.email')} type="email" placeholder="name@example.com" error={userForm.formState.errors.email?.message ? t(userForm.formState.errors.email.message) : undefined} {...userForm.register('email')} />
-          <Input label={t('auth.password')} type="password" placeholder="••••••••" error={userForm.formState.errors.password?.message ? t(userForm.formState.errors.password.message) : undefined} {...userForm.register('password')} />
-          <div className="grid grid-cols-2 gap-3">
-            <Input label={t('auth.firstName')} error={userForm.formState.errors.firstName?.message ? t(userForm.formState.errors.firstName.message) : undefined} {...userForm.register('firstName')} />
-            <Input label={t('auth.lastName')} error={userForm.formState.errors.lastName?.message ? t(userForm.formState.errors.lastName.message) : undefined} {...userForm.register('lastName')} />
+    <div className="min-h-screen bg-mesh-bg flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-2xl">
+        <Card className="p-8 sm:p-10">
+          <div className="text-center mb-7">
+            <h1 className="text-3xl font-bold text-gradient-gold">{t('auth.signup')}</h1>
+            <p className="text-base text-mesh-muted mt-2">{t('auth.signupSubtitle')}</p>
           </div>
-          <Input label={t('auth.phoneNumber')} placeholder={`(${t('common.optional')})`} error={userForm.formState.errors.phoneNumber?.message ? t(userForm.formState.errors.phoneNumber.message) : undefined} {...userForm.register('phoneNumber')} />
-          <Button type="submit" fullWidth loading={loading}>
-            <UserPlus size={16} />
-            {t('auth.signupButton')}
-          </Button>
-        </form>
-      ) : (
-        <form onSubmit={vendorForm.handleSubmit(onSubmitVendor)} className="space-y-4">
-          <Input label={t('auth.email')} type="email" placeholder="vendor@company.com" error={vendorForm.formState.errors.email?.message ? t(vendorForm.formState.errors.email.message) : undefined} {...vendorForm.register('email')} />
-          <Input label={t('auth.password')} type="password" placeholder="••••••••" error={vendorForm.formState.errors.password?.message ? t(vendorForm.formState.errors.password.message) : undefined} {...vendorForm.register('password')} />
-          <Input label={t('auth.businessName')} error={vendorForm.formState.errors.businessName?.message ? t(vendorForm.formState.errors.businessName.message) : undefined} {...vendorForm.register('businessName')} />
-          <Input label={t('auth.contactPerson')} error={vendorForm.formState.errors.contactPersonName?.message ? t(vendorForm.formState.errors.contactPersonName.message) : undefined} {...vendorForm.register('contactPersonName')} />
-          <Input label={t('auth.phoneNumber')} placeholder={`(${t('common.optional')})`} {...vendorForm.register('phoneNumber')} />
-          <Input label={t('auth.businessAddress')} placeholder={`(${t('common.optional')})`} {...vendorForm.register('businessAddress')} />
-          <Button type="submit" fullWidth loading={loading}>
-            <UserPlus size={16} />
-            {t('auth.signupButton')}
-          </Button>
-        </form>
-      )}
 
-      <p className="text-center text-sm text-mesh-muted mt-6">
-        {t('auth.hasAccount')}{' '}
-        <Link to="/login" className="text-mesh-gold hover:text-mesh-gold-hover font-medium">
-          {t('auth.login')}
-        </Link>
-      </p>
-    </Card>
+          <div className="flex rounded-[var(--radius-mesh-sm)] border border-mesh-border mb-7 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => switchTab(false)}
+              className={`flex-1 py-3 text-sm font-medium transition-colors cursor-pointer ${
+                !isVendor ? 'bg-mesh-gold text-mesh-bg' : 'text-mesh-muted hover:text-mesh-text'
+              }`}
+            >
+              {t('auth.signupAsUser')}
+            </button>
+            <button
+              type="button"
+              onClick={() => switchTab(true)}
+              className={`flex-1 py-3 text-sm font-medium transition-colors cursor-pointer ${
+                isVendor ? 'bg-mesh-gold text-mesh-bg' : 'text-mesh-muted hover:text-mesh-text'
+              }`}
+            >
+              {t('auth.signupAsVendor')}
+            </button>
+          </div>
+
+          {!isVendor ? (
+            <form onSubmit={userForm.handleSubmit(onSubmitUser)} className="space-y-5">
+              <Input
+                label={t('auth.email')}
+                type="email"
+                placeholder="name@example.com"
+                error={userForm.formState.errors.email?.message ? t(userForm.formState.errors.email.message) : undefined}
+                {...userForm.register('email')}
+              />
+              <Input
+                label={t('auth.password')}
+                type="password"
+                placeholder="••••••••"
+                error={userForm.formState.errors.password?.message ? t(userForm.formState.errors.password.message) : undefined}
+                {...userForm.register('password')}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label={t('auth.firstName')}
+                  error={userForm.formState.errors.firstName?.message ? t(userForm.formState.errors.firstName.message) : undefined}
+                  {...userForm.register('firstName')}
+                />
+                <Input
+                  label={t('auth.lastName')}
+                  error={userForm.formState.errors.lastName?.message ? t(userForm.formState.errors.lastName.message) : undefined}
+                  {...userForm.register('lastName')}
+                />
+              </div>
+              <Input
+                label={t('auth.phoneNumber')}
+                placeholder={`(${t('common.optional')})`}
+                error={userForm.formState.errors.phoneNumber?.message ? t(userForm.formState.errors.phoneNumber.message) : undefined}
+                {...userForm.register('phoneNumber')}
+              />
+              <Button type="submit" fullWidth loading={loading}>
+                <UserPlus size={16} />
+                {t('auth.signupButton')}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={vendorForm.handleSubmit(onSubmitVendor)} className="space-y-5">
+              <Input
+                label={t('auth.email')}
+                type="email"
+                placeholder="vendor@company.com"
+                error={vendorForm.formState.errors.email?.message ? t(vendorForm.formState.errors.email.message) : undefined}
+                {...vendorForm.register('email')}
+              />
+              <Input
+                label={t('auth.password')}
+                type="password"
+                placeholder="••••••••"
+                error={vendorForm.formState.errors.password?.message ? t(vendorForm.formState.errors.password.message) : undefined}
+                {...vendorForm.register('password')}
+              />
+              <Input
+                label={t('auth.businessName')}
+                error={vendorForm.formState.errors.businessName?.message ? t(vendorForm.formState.errors.businessName.message) : undefined}
+                {...vendorForm.register('businessName')}
+              />
+              <Input
+                label={t('auth.contactPerson')}
+                error={vendorForm.formState.errors.contactPersonName?.message ? t(vendorForm.formState.errors.contactPersonName.message) : undefined}
+                {...vendorForm.register('contactPersonName')}
+              />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label={t('auth.phoneNumber')}
+                  placeholder={`(${t('common.optional')})`}
+                  {...vendorForm.register('phoneNumber')}
+                />
+                <Input
+                  label={t('auth.businessAddress')}
+                  placeholder={`(${t('common.optional')})`}
+                  {...vendorForm.register('businessAddress')}
+                />
+              </div>
+              <Button type="submit" fullWidth loading={loading}>
+                <UserPlus size={16} />
+                {t('auth.signupButton')}
+              </Button>
+            </form>
+          )}
+
+          <p className="text-center text-sm text-mesh-muted mt-7">
+            {t('auth.hasAccount')}{' '}
+            <Link to="/login" className="text-mesh-gold hover:text-mesh-gold-hover font-medium">
+              {t('auth.login')}
+            </Link>
+          </p>
+        </Card>
+      </div>
+    </div>
   );
 }

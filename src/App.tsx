@@ -30,8 +30,8 @@ function App() {
   return (
     <Routes>
       {/* Auth */}
-      <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-      <Route path="/signup" element={<AuthLayout><SignupPage /></AuthLayout>} />
+      <Route path="/login" element={<AuthLayout hideHeader><LoginPage /></AuthLayout>} />
+      <Route path="/signup" element={<AuthLayout hideHeader><SignupPage /></AuthLayout>} />
       <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
       <Route path="/reset-password" element={<AuthLayout><ResetPasswordPage /></AuthLayout>} />
 

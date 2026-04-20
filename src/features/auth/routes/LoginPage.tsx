@@ -43,12 +43,10 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative h-full">
-      <div className="absolute -inset-10 blur-3xl opacity-25 bg-gradient-to-br from-mesh-gold/30 via-mesh-accent/20 to-violet-500/10 rounded-full pointer-events-none" />
-
-      <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6 lg:gap-10 items-stretch min-h-[calc(100vh-140px)]">
-        {/* 3D Video Hero */}
-        <div className="relative overflow-hidden rounded-[var(--radius-mesh)] border border-white/[0.10] bg-black/20 backdrop-blur-xl shadow-[0_24px_60px_rgba(0,0,0,0.55)] h-[260px] lg:h-full">
+    <div className="min-h-screen bg-mesh-bg">
+      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+        {/* Left: video */}
+        <div className="relative overflow-hidden min-h-[260px] lg:min-h-screen">
           <video
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
@@ -61,27 +59,34 @@ export function LoginPage() {
             <source src={videoWebm} type="video/webm" />
             <source src={videoMp4} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-black/55 via-black/10 to-black/35" />
-          <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gradient-mixed">
-              {t('auth.loginTitle3d', 'Experience CarMesh in 3D')}
-            </h2>
-            <p className="text-sm text-mesh-muted mt-1.5 max-w-md">
-              {t('auth.loginSubtitle3d', 'A modern marketplace for buying and renting vehicles, enhanced with 3D modeling.')}
-            </p>
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-br from-mesh-gold/15 via-transparent to-mesh-accent/10" />
+
+          <div className="absolute top-0 left-0 rtl:left-auto rtl:right-0 z-10 p-7 sm:p-12">
+            <div className="max-w-2xl">
+              <h2 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gradient-mixed drop-shadow-[0_14px_40px_rgba(0,0,0,0.6)]">
+                {t('auth.loginTitle3d', 'Experience CarMesh in 3D')}
+              </h2>
+              <p className="text-lg sm:text-xl lg:text-2xl text-white/85 mt-4 leading-relaxed drop-shadow-[0_14px_40px_rgba(0,0,0,0.6)]">
+                {t(
+                  'auth.loginSubtitle3d',
+                  'A modern marketplace for buying and renting vehicles, enhanced with 3D modeling.',
+                )}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Login Card */}
-        <div className="relative flex items-center lg:justify-end">
-          <div className="w-full">
-            <Card className="relative">
-              <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold text-gradient-gold">{t('auth.login')}</h1>
-                <p className="text-sm text-mesh-muted mt-1.5">{t('auth.loginSubtitle')}</p>
+        {/* Right: login */}
+        <div className="relative flex items-center justify-center px-4 py-10 lg:px-10">
+          <div className="w-full max-w-xl">
+            <Card className="relative p-10 sm:p-12">
+              <div className="text-center mb-8">
+                <h1 className="text-4xl font-bold text-gradient-gold">{t('auth.login')}</h1>
+                <p className="text-lg text-mesh-muted mt-2.5">{t('auth.loginSubtitle')}</p>
               </div>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <Input
                   label={t('auth.email')}
                   type="email"
@@ -98,7 +103,10 @@ export function LoginPage() {
                 />
 
                 <div className="flex justify-end">
-                  <Link to="/forgot-password" className="text-xs text-mesh-gold hover:text-mesh-gold-hover transition-colors">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-mesh-gold hover:text-mesh-gold-hover transition-colors"
+                  >
                     {t('auth.forgotPasswordLink')}
                   </Link>
                 </div>
@@ -109,7 +117,7 @@ export function LoginPage() {
                 </Button>
               </form>
 
-              <p className="text-center text-sm text-mesh-muted mt-6">
+              <p className="text-center text-base text-mesh-muted mt-8">
                 {t('auth.noAccount')}{' '}
                 <Link to="/signup" className="text-mesh-gold hover:text-mesh-gold-hover font-medium transition-colors">
                   {t('auth.signup')}
