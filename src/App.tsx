@@ -16,6 +16,7 @@ import { UserProfilePage } from './features/user-account/routes/UserProfilePage'
 import { FavoritesPage } from './features/favorites/routes/FavoritesPage';
 import { UserPurchasesPage } from './features/purchase-requests/routes/UserPurchasesPage';
 import { UserRentalsPage } from './features/rental-requests/routes/UserRentalsPage';
+import { ChatbotPage } from './features/chat/routes/ChatbotPage';
 import { VendorDashboardPage } from './features/vendor-profile/routes/VendorDashboardPage';
 import { VendorProfilePage } from './features/vendor-profile/routes/VendorProfilePage';
 import { VehicleManagementPage } from './features/vendor-profile/routes/VehicleManagementPage';
@@ -46,6 +47,7 @@ function App() {
       <Route path="/user/favorites" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><FavoritesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/purchases" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserPurchasesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/rentals" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserRentalsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/user/chat" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><ChatbotPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
 
       {/* Vendor */}
       <Route path="/vendor/dashboard" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorDashboardPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />

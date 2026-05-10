@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   User,
   Heart,
+  MessageSquareText,
   ShoppingCart,
   CalendarClock,
   Truck,
@@ -56,6 +57,7 @@ function useNavItems(): NavItem[] {
     { label: t('nav.dashboard'), path: '/user/dashboard', icon: <LayoutDashboard size={18} /> },
     { label: t('nav.profile'), path: '/user/profile', icon: <User size={18} /> },
     { label: t('nav.favorites'), path: '/user/favorites', icon: <Heart size={18} /> },
+    { label: 'Chatbot', path: '/user/chat', icon: <MessageSquareText size={18} /> },
     { label: t('nav.purchases'), path: '/user/purchases', icon: <ShoppingCart size={18} /> },
     { label: t('nav.rentals'), path: '/user/rentals', icon: <CalendarClock size={18} /> },
   ];
