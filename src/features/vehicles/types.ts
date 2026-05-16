@@ -18,6 +18,9 @@ export interface Vehicle {
   locationCity: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Present on vehicle detail responses when the backend includes 3D listing metadata */
+  has3DModel?: boolean;
+  threeDModelUrl?: string | null;
   images?: VehicleImage[];
   vendor?: { businessName: string; contactPersonName: string; logoUrl: string | null };
 }

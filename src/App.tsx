@@ -26,6 +26,10 @@ import { VendorRentalsPage } from './features/rental-requests/routes/VendorRenta
 import { AdminDashboardPage } from './features/admin-profile/routes/AdminDashboardPage';
 import { AdminProfilePage } from './features/admin-profile/routes/AdminProfilePage';
 import { ReportsManagementPage } from './features/reports/routes/ReportsManagementPage';
+import { LocalModelPreviewPage } from './features/3dgeneration';
+import { VehiclePublic3dPage } from './features/vehicle-3d/routes/VehiclePublic3dPage';
+import { VendorVehicleGenerate3dPage } from './features/vehicle-3d/routes/VendorVehicleGenerate3dPage';
+import { UserPersonal3dPage } from './features/vehicle-3d/routes/UserPersonal3dPage';
 
 function App() {
   return (
@@ -40,6 +44,8 @@ function App() {
       <Route path="/" element={<Navigate to="/vehicles" replace />} />
       <Route path="/vehicles" element={<MainLayout><CatalogPage /></MainLayout>} />
       <Route path="/vehicles/:id" element={<MainLayout><VehicleDetailPage /></MainLayout>} />
+      <Route path="/vehicles/:id/3d" element={<MainLayout><VehiclePublic3dPage /></MainLayout>} />
+      <Route path="/local-3d" element={<MainLayout><LocalModelPreviewPage /></MainLayout>} />
 
       {/* User */}
       <Route path="/user/dashboard" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserDashboardPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
@@ -47,6 +53,7 @@ function App() {
       <Route path="/user/favorites" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><FavoritesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/purchases" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserPurchasesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/rentals" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserRentalsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/user/personal-3d" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserPersonal3dPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/chat" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><ChatbotPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
 
       {/* Vendor */}
@@ -55,6 +62,7 @@ function App() {
       <Route path="/vendor/vehicles" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VehicleManagementPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/vehicles/new" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VehicleFormPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/vehicles/:id/edit" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VehicleFormPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/vendor/vehicles/:id/generate-3d" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorVehicleGenerate3dPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/purchases" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorPurchasesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/rentals" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorRentalsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
 

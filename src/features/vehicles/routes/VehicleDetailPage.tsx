@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
+  Box,
 } from 'lucide-react';
 
 import { vehiclesApi } from '../api/vehiclesApi';
@@ -458,6 +459,17 @@ export function VehicleDetailPage() {
                   {t(`availability.${vehicle.availabilityStatus}`, vehicle.availabilityStatus)}
                 </Badge>
               </div>
+
+              {vehicle.listingStatus === 'PUBLISHED' && vehicle.has3DModel && (
+                <div className="mb-4">
+                  <Link to={`/vehicles/${vehicle.id}/3d`}>
+                    <Button variant="secondary" size="sm" className="gap-2">
+                      <Box size={16} />
+                      {t('detail.view3d', '3D view')}
+                    </Button>
+                  </Link>
+                </div>
+              )}
 
               <div className="space-y-1 mb-4">
                 {(vehicle.listingType === 'SALE' || vehicle.listingType === 'BOTH') && vehicle.price && (

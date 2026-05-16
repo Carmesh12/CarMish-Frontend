@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, User, Heart, ShoppingCart, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, User, Heart, ShoppingCart, CalendarDays, Box } from 'lucide-react';
 import { getUserDashboard } from '../api/userProfileApi';
 import type { UserDashboardResponse } from '../types';
 import { resolveMediaUrl } from '../../../lib/api';
+import { vehicle3dApi, type Personal3dModelSummary } from '../../vehicle-3d/api/vehicle3dApi';
 import { Card } from '../../../components/ui/Card';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Badge } from '../../../components/ui/Badge';
@@ -27,6 +28,22 @@ export function UserDashboardPage() {
   const [data, setData] = useState<UserDashboardResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [personal3d, setPersonal3d] = useState<Personal3dModelSummary[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    vehicle3dApi
+      .listPersonalModels()
+      .then((list) => {
+        if (!cancelled) setPersonal3d(list);
+      })
+      .catch(() => {
+        if (!cancelled) setPersonal3d([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -128,6 +145,57 @@ export function UserDashboardPage() {
           </p>
         )}
       </Card>
+
+      {personal3d && personal3d.length === 0 && (
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <Box size={20} className="text-mesh-gold shrink-0 mt-0.5" />
+              <div>
+                <h2 className="text-sm font-medium text-mesh-text">{t('dashboard.my3dEmptyTitle', 'Personal 3D models')}</h2>
+                <p className="text-xs text-mesh-muted mt-1">
+                  {t('dashboard.my3dEmptyHint', 'Generate a private 3D model from four photos of your car.')}
+                </p>
+              </div>
+            </div>
+            <Link to="/user/personal-3d">
+              <Button size="sm">{t('threeD.getStarted', 'Get started')}</Button>
+            </Link>
+          </div>
+        </Card>
+      )}
+
+      {personal3d && personal3d.length > 0 && (
+        <Card>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <h2 className="text-sm font-medium uppercase tracking-wider text-mesh-muted flex items-center gap-2">
+              <Box size={16} className="text-mesh-gold" />
+              {t('dashboard.my3dModels', 'My 3D models')}
+            </h2>
+            <Link to="/user/personal-3d">
+              <Button variant="secondary" size="sm">{t('threeD.newModel', 'New 3D')}</Button>
+            </Link>
+          </div>
+          <ul className="space-y-2">
+            {personal3d.map((m) => (
+              <li
+                key={m.id}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-[var(--radius-mesh-sm)] border border-mesh-border/60 bg-white/[0.02] px-3 py-2 text-sm"
+              >
+                <span className="text-mesh-text font-medium truncate">
+                  {m.title ?? t('threeD.untitledModel', 'Untitled model')}
+                </span>
+                <span className="text-mesh-muted text-xs">
+                  {new Date(m.generatedAt).toLocaleDateString()}
+                </span>
+                <Link to={`/local-3d?src=${encodeURIComponent(m.modelUrl)}`}>
+                  <Button variant="ghost" size="sm">{t('threeD.openPreview', 'Open preview')}</Button>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <Card>

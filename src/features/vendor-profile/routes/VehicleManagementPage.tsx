@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Car, Plus, Eye, EyeOff, Archive, Pencil } from 'lucide-react';
+import { Car, Plus, Eye, EyeOff, Archive, Pencil, Box } from 'lucide-react';
 import { vehiclesApi } from '../../vehicles/api/vehiclesApi';
 import type { Vehicle } from '../../vehicles/types';
 import { resolveMediaUrl } from '../../../lib/api';
@@ -154,6 +154,11 @@ export function VehicleManagementPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-1.5">
+                          <Link to={`/vendor/vehicles/${v.id}/generate-3d`}>
+                            <Button variant="ghost" size="sm" title={t('threeD.generate', '3D')}>
+                              <Box size={14} />
+                            </Button>
+                          </Link>
                           <Link to={`/vendor/vehicles/${v.id}/edit`}>
                             <Button variant="ghost" size="sm" title={t('common.edit')}>
                               <Pencil size={14} />

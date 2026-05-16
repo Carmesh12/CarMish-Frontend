@@ -18,6 +18,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  Boxes,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { useAuthStore } from '../../stores/authStore';
@@ -57,6 +58,7 @@ function useNavItems(): NavItem[] {
     { label: t('nav.dashboard'), path: '/user/dashboard', icon: <LayoutDashboard size={18} /> },
     { label: t('nav.profile'), path: '/user/profile', icon: <User size={18} /> },
     { label: t('nav.favorites'), path: '/user/favorites', icon: <Heart size={18} /> },
+    { label: t('nav.my3d'), path: '/user/personal-3d', icon: <Boxes size={18} /> },
     { label: 'Chatbot', path: '/user/chat', icon: <MessageSquareText size={18} /> },
     { label: t('nav.purchases'), path: '/user/purchases', icon: <ShoppingCart size={18} /> },
     { label: t('nav.rentals'), path: '/user/rentals', icon: <CalendarClock size={18} /> },
