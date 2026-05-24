@@ -63,7 +63,9 @@ export function UserPurchasesPage() {
               <tbody>
                 {requests.map((req) => (
                   <tr key={req.id} className="border-b border-mesh-border/50 hover:bg-mesh-surface/50 transition-colors">
-                    <td className="p-4 text-mesh-text font-medium">{req.vehicleId.slice(0, 8)}…</td>
+                    <td className="p-4 text-mesh-text font-medium">
+                      {req.vehicle?.title ?? `${req.vehicleId.slice(0, 8)}…`}
+                    </td>
                     <td className="p-4 text-mesh-gold font-semibold">
                       {req.offeredPrice ? `$${Number(req.offeredPrice).toLocaleString()}` : '—'}
                     </td>

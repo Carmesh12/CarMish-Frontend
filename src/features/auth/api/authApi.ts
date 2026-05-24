@@ -7,8 +7,13 @@ export interface AuthResponse {
     id: string;
     email: string;
     role: 'USER' | 'VENDOR' | 'ADMIN';
+    emailVerified: boolean;
     profile: Record<string, unknown> | null;
   };
+}
+
+export interface AuthMessageResponse {
+  message: string;
 }
 
 async function post<T>(path: string, body: Record<string, unknown>): Promise<T> {
@@ -32,10 +37,16 @@ export const authApi = {
     post<AuthResponse>('/auth/login', body),
 
   signupUser: (body: { email: string; password: string; firstName: string; lastName: string; phoneNumber?: string }) =>
-    post<AuthResponse>('/auth/signup', body),
+    post<AuthMessageResponse>('/auth/signup', body),
 
   signupVendor: (body: { email: string; password: string; businessName: string; contactPersonName: string; phoneNumber?: string; businessAddress?: string }) =>
-    post<AuthResponse>('/auth/signup/vendor', body),
+    post<AuthMessageResponse>('/auth/signup/vendor', body),
+
+  verifyEmail: (token: string) =>
+    post<AuthMessageResponse>('/auth/verify-email', { token }),
+
+  resendVerification: (email: string) =>
+    post<AuthMessageResponse>('/auth/resend-verification', { email }),
 
   forgotPassword: (email: string) =>
     post<{ message: string }>('/auth/forgot-password', { email }),

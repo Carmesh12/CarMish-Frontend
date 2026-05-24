@@ -12,7 +12,6 @@ import {
   Truck,
   PlusCircle,
   Flag,
-  Bell,
   LogOut,
   Menu,
   X,
@@ -21,8 +20,9 @@ import {
   Boxes,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import { ThemeToggle } from '../ThemeToggle';
+import { NotificationBell } from '../NotificationBell';
 import { useAuthStore } from '../../stores/authStore';
-import { useNotificationStore } from '../../stores/notificationStore';
 import { performLogout } from '../../lib/logout';
 
 interface NavItem {
@@ -71,7 +71,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const isRtl = i18n.language === 'ar';
   const navItems = useNavItems();
-  const unreadCount = useNotificationStore((s) => s.unreadCount);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -147,6 +146,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           <div className="flex-1" />
 
           <div className="flex items-center gap-3">
+            <ThemeToggle compact />
             <LanguageSwitcher compact />
             <Link
               to="/vehicles"
@@ -154,22 +154,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             >
               {t('nav.vehicles')}
             </Link>
-            <button
-              onClick={() => {
-                const role = useAuthStore.getState().role;
-                if (role === 'USER') navigate('/user/dashboard');
-                else if (role === 'VENDOR') navigate('/vendor/dashboard');
-                else if (role === 'ADMIN') navigate('/admin/dashboard');
-              }}
-              className="relative text-mesh-muted hover:text-mesh-text transition-colors duration-200 cursor-pointer"
-            >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1.5 -end-1.5 w-4 h-4 bg-gradient-to-r from-mesh-gold to-mesh-gold-hover text-mesh-bg text-[10px] font-bold rounded-full flex items-center justify-center shadow-[0_0_8px_rgba(212,168,83,0.3)]">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
+            <NotificationBell />
           </div>
         </header>
 

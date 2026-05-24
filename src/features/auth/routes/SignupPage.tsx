@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { UserPlus } from 'lucide-react';
+import { MailCheck, UserPlus } from 'lucide-react';
 import {
   signupUserSchema,
   signupVendorSchema,
@@ -19,11 +19,12 @@ import { Card } from '../../../components/ui/Card';
 
 export function SignupPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated, role } = useAuthStore();
-  const login = useAuthStore((s) => s.login);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [signupMessage, setSignupMessage] = useState<string | null>(null);
 
   const isVendor = searchParams.get('type') === 'vendor';
 
@@ -41,9 +42,9 @@ export function SignupPage() {
     try {
       const body = { ...data, phoneNumber: data.phoneNumber || undefined };
       const res = await authApi.signupUser(body);
-      login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
-      notifySuccess(t('auth.signupSubtitle'));
-      navigate(getAccountHomePath(res.user.role), { replace: true });
+      setVerificationEmail(body.email);
+      setSignupMessage(res.message);
+      notifySuccess(t('auth.accountCreatedVerify'));
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Signup failed');
     } finally {
@@ -60,13 +61,27 @@ export function SignupPage() {
         businessAddress: data.businessAddress || undefined,
       };
       const res = await authApi.signupVendor(body);
-      login({ accessToken: res.accessToken, refreshToken: res.refreshToken, user: res.user });
-      notifySuccess(t('auth.signupSubtitle'));
-      navigate(getAccountHomePath(res.user.role), { replace: true });
+      setVerificationEmail(body.email);
+      setSignupMessage(res.message);
+      notifySuccess(t('auth.accountCreatedVerify'));
     } catch (err: unknown) {
       notifyError(err instanceof Error ? err.message : 'Signup failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    if (!verificationEmail) return;
+
+    setResendLoading(true);
+    try {
+      const res = await authApi.resendVerification(verificationEmail);
+      notifySuccess(res.message);
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Could not resend verification email');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -79,6 +94,33 @@ export function SignupPage() {
             <p className="text-base text-mesh-muted mt-2">{t('auth.signupSubtitle')}</p>
           </div>
 
+          {signupMessage && verificationEmail ? (
+            <div className="text-center space-y-5">
+              <div className="mx-auto h-14 w-14 rounded-full border border-mesh-gold/40 bg-mesh-gold/10 flex items-center justify-center text-mesh-gold">
+                <MailCheck size={28} />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-mesh-text">
+                  {t('auth.checkEmailTitle')}
+                </h2>
+                <p className="text-sm text-mesh-muted mt-2">{signupMessage}</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                loading={resendLoading}
+                onClick={resendVerification}
+              >
+                {t('auth.resendVerification')}
+              </Button>
+              <p className="text-center text-sm text-mesh-muted">
+                <Link to="/login" className="text-mesh-gold hover:text-mesh-gold-hover font-medium">
+                  {t('auth.login')}
+                </Link>
+              </p>
+            </div>
+          ) : (
+            <>
           <div className="flex rounded-[var(--radius-mesh-sm)] border border-mesh-border mb-7 overflow-hidden">
             <button
               type="button"
@@ -190,6 +232,8 @@ export function SignupPage() {
               {t('auth.login')}
             </Link>
           </p>
+            </>
+          )}
         </Card>
       </div>
     </div>

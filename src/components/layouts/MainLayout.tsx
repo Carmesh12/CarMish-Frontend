@@ -12,6 +12,8 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import { ThemeToggle } from '../ThemeToggle';
+import { NotificationBell } from '../NotificationBell';
 import { useAuthStore, getAccountHomePath } from '../../stores/authStore';
 import { performLogout } from '../../lib/logout';
 import { Button } from '../ui/Button';
@@ -38,7 +40,9 @@ export function MainLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle compact />
             <LanguageSwitcher compact />
+            {isAuthenticated && <NotificationBell />}
             {isAuthenticated ? (
               <>
                 <Link to={getAccountHomePath(role)}>
@@ -85,6 +89,12 @@ export function MainLayout({ children }: { children: ReactNode }) {
             </Link>
             {isAuthenticated ? (
               <>
+                <div className="flex items-center justify-between py-2">
+                  <span className="text-sm text-mesh-muted">
+                    {t('notifications.title')}
+                  </span>
+                  <NotificationBell />
+                </div>
                 <Link to={getAccountHomePath(role)} className="flex items-center gap-2 text-sm text-mesh-muted hover:text-mesh-text py-2" onClick={() => setMobileOpen(false)}>
                   <User size={16} />
                   {t('nav.dashboard')}
@@ -106,6 +116,9 @@ export function MainLayout({ children }: { children: ReactNode }) {
                 </Link>
               </>
             )}
+            <div className="pt-2 border-t border-white/[0.06]">
+              <ThemeToggle />
+            </div>
             <div className="pt-2 border-t border-white/[0.06]">
               <LanguageSwitcher />
             </div>

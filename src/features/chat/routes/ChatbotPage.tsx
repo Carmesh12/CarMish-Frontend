@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MessageSquareText, Plus, Send, Trash2 } from 'lucide-react';
 import { chatApi } from '../api/chatApi';
 import type { ChatMessage, ChatSession, SendMessageResponse } from '../types';
@@ -401,52 +402,59 @@ export function ChatbotPage() {
                     const thumbSrc = firstImageUrl ? resolveMediaUrl(firstImageUrl) : null;
 
                     return (
-                      <Card key={v.id} className="space-y-2">
-                        <div className="flex items-start gap-4">
-                          <div className="w-20 h-16 shrink-0 rounded-[var(--radius-mesh)] overflow-hidden border border-white/[0.08] bg-white/[0.04]">
-                            {thumbSrc ? (
-                              <img
-                                src={thumbSrc}
-                                alt=""
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                              />
-                            ) : null}
+                      <Link
+                        key={v.id}
+                        to={`/vehicles/${v.id}`}
+                        className="group block rounded-mesh focus:outline-none focus-visible:ring-2 focus-visible:ring-mesh-gold/70"
+                        aria-label={`View details for ${v.title}`}
+                      >
+                        <Card className="space-y-2 h-full transition-all duration-300 group-hover:border-mesh-gold/35 group-hover:bg-white/6 group-hover:shadow-[0_18px_45px_rgba(0,0,0,0.35)]">
+                          <div className="flex items-start gap-4">
+                            <div className="w-20 h-16 shrink-0 rounded-mesh overflow-hidden border border-white/8 bg-white/4">
+                              {thumbSrc ? (
+                                <img
+                                  src={thumbSrc}
+                                  alt={v.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                  loading="lazy"
+                                />
+                              ) : null}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-mesh-text truncate text-base transition-colors group-hover:text-mesh-gold">
+                                {v.title}
+                              </p>
+                              <p className="text-sm text-mesh-muted">
+                                {v.brand} {v.model} • {v.year}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-mesh-text truncate text-base">
-                              {v.title}
-                            </p>
-                            <p className="text-sm text-mesh-muted">
-                              {v.brand} {v.model} • {v.year}
-                            </p>
+
+                          <div className="text-sm">
+                            {v.price && (
+                              <span className="text-mesh-gold font-semibold">
+                                ${Number(v.price).toLocaleString()}
+                              </span>
+                            )}
+                            {v.rentalPricePerDay && (
+                              <span className="text-mesh-muted text-sm ms-2">
+                                ${Number(v.rentalPricePerDay).toLocaleString()}/day
+                              </span>
+                            )}
                           </div>
-                        </div>
 
-                        <div className="text-sm">
-                          {v.price && (
-                            <span className="text-mesh-gold font-semibold">
-                              ${Number(v.price).toLocaleString()}
+                          <div className="text-xs text-mesh-muted flex flex-wrap gap-2">
+                            {v.locationCity && (
+                              <span className="px-2 py-1 rounded-full bg-white/4 border border-white/8">
+                                {v.locationCity}
+                              </span>
+                            )}
+                            <span className="px-2 py-1 rounded-full bg-white/4 border border-white/8">
+                              {v.listingType}
                             </span>
-                          )}
-                          {v.rentalPricePerDay && (
-                            <span className="text-mesh-muted text-sm ms-2">
-                              ${Number(v.rentalPricePerDay).toLocaleString()}/day
-                            </span>
-                          )}
-                        </div>
-
-                        <div className="text-xs text-mesh-muted flex flex-wrap gap-2">
-                          {v.locationCity && (
-                            <span className="px-2 py-1 rounded-full bg-white/[0.04] border border-white/[0.08]">
-                              {v.locationCity}
-                            </span>
-                          )}
-                          <span className="px-2 py-1 rounded-full bg-white/[0.04] border border-white/[0.08]">
-                            {v.listingType}
-                          </span>
-                        </div>
-                      </Card>
+                          </div>
+                        </Card>
+                      </Link>
                     );
                   })}
                 </div>

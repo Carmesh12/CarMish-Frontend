@@ -20,6 +20,8 @@ interface NotificationState {
 
   fetch: () => Promise<void>;
   markRead: (id: string) => Promise<void>;
+  markAllRead: () => Promise<void>;
+  clear: () => void;
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
@@ -54,5 +56,23 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     } catch {
       /* silently fail */
     }
+  },
+
+  markAllRead: async () => {
+    try {
+      const data = await authJson<Notification[]>('/notifications/me/read-all', {
+        method: 'PATCH',
+      });
+      set({
+        notifications: data,
+        unreadCount: 0,
+      });
+    } catch {
+      /* silently fail */
+    }
+  },
+
+  clear: () => {
+    set({ notifications: [], unreadCount: 0, isLoading: false });
   },
 }));

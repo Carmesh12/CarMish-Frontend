@@ -46,7 +46,9 @@
     "rentals": "الإيجارات",
     "reports": "البلاغات",
     "notifications": "الإشعارات",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "lightMode": "فاتح",
+    "darkMode": "داكن"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -78,6 +80,15 @@
     "signupButton": "إنشاء حساب",
     "resetButton": "إعادة التعيين",
     "sendResetLink": "إرسال رابط التعيين",
+    "checkEmailTitle": "تحقق من بريدك الإلكتروني",
+    "accountCreatedVerify": "تم إنشاء الحساب. يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك.",
+    "verifyEmailTitle": "تأكيد البريد الإلكتروني",
+    "emailVerifiedTitle": "تم تأكيد البريد الإلكتروني",
+    "verifyingEmail": "جاري تأكيد بريدك الإلكتروني...",
+    "verificationFailed": "فشل تأكيد البريد الإلكتروني",
+    "missingVerificationToken": "رمز التحقق غير موجود.",
+    "verifyBeforeLogin": "يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول.",
+    "resendVerification": "إعادة إرسال رسالة التحقق",
     "resetSuccess": "تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول.",
     "forgotSuccess": "إذا كان هناك حساب بهذا البريد الإلكتروني، فقد تم إرسال رابط إعادة التعيين.",
     "passwordMinLength": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
@@ -223,6 +234,8 @@
   "notifications": {
     "title": "الإشعارات",
     "markRead": "تحديد كمقروء",
+    "markAllRead": "تحديد الكل كمقروء",
+    "open": "فتح",
     "empty": "لا توجد إشعارات",
     "unread": "غير مقروء"
   },
@@ -254,7 +267,9 @@
     "verificationStatus": "حالة التحقق",
     "updateSuccess": "تم تحديث الملف الشخصي بنجاح",
     "passwordSuccess": "تم تغيير كلمة المرور بنجاح",
-    "imageSuccess": "تم رفع الصورة بنجاح"
+    "imageSuccess": "تم رفع الصورة بنجاح",
+    "businessLogo": "شعار الشركة",
+    "uploadLogo": "رفع الشعار"
   },
   "vendor": {
     "myVehicles": "سياراتي",

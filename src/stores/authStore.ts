@@ -6,6 +6,7 @@ export interface AuthUser {
   id: string;
   email: string;
   role: AccountRole;
+  emailVerified: boolean;
   profile: Record<string, unknown> | null;
 }
 

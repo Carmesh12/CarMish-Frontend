@@ -6,8 +6,10 @@ import './index.css';
 import App from './App';
 import { AppToastContainer } from './components/AppToastContainer';
 import { useAuthStore } from './stores/authStore';
+import { useThemeStore } from './stores/themeStore';
 
 useAuthStore.getState().hydrate();
+useThemeStore.getState().hydrate();
 
 const lang = localStorage.getItem('i18nextLng') || 'en';
 document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';

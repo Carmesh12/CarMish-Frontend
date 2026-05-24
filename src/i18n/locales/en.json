@@ -46,7 +46,9 @@
     "rentals": "Rentals",
     "reports": "Reports",
     "notifications": "Notifications",
-    "settings": "Settings"
+    "settings": "Settings",
+    "lightMode": "Light",
+    "darkMode": "Dark"
   },
   "auth": {
     "login": "Sign In",
@@ -78,6 +80,15 @@
     "signupButton": "Create Account",
     "resetButton": "Reset Password",
     "sendResetLink": "Send Reset Link",
+    "checkEmailTitle": "Check your email",
+    "accountCreatedVerify": "Account created. Please check your email to verify your account.",
+    "verifyEmailTitle": "Verify Email",
+    "emailVerifiedTitle": "Email Verified",
+    "verifyingEmail": "Verifying your email...",
+    "verificationFailed": "Email verification failed",
+    "missingVerificationToken": "Verification token is missing.",
+    "verifyBeforeLogin": "Please verify your email before logging in.",
+    "resendVerification": "Resend verification email",
     "resetSuccess": "Password reset successfully! You can now sign in.",
     "forgotSuccess": "If an account exists with that email, a reset link has been sent.",
     "passwordMinLength": "Password must be at least 8 characters",
@@ -223,6 +234,8 @@
   "notifications": {
     "title": "Notifications",
     "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "open": "Open",
     "empty": "No notifications",
     "unread": "unread"
   },
@@ -254,7 +267,9 @@
     "verificationStatus": "Verification Status",
     "updateSuccess": "Profile updated successfully",
     "passwordSuccess": "Password changed successfully",
-    "imageSuccess": "Image uploaded successfully"
+    "imageSuccess": "Image uploaded successfully",
+    "businessLogo": "Business Logo",
+    "uploadLogo": "Upload Logo"
   },
   "vendor": {
     "myVehicles": "My Vehicles",

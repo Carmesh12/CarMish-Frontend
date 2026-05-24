@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ArrowLeft, Upload } from "lucide-react";
 import {
-  isThreeDMockMode,
   vehicle3dApi,
+  type ThreeDGenerationConfig,
   type ThreeDJobStatusResponse,
-} from '../api/vehicle3dApi';
-import { LocalModelViewer } from '../../3dgeneration';
-import { Button } from '../../../components/ui/Button';
-import { Card } from '../../../components/ui/Card';
-import { Spinner } from '../../../components/ui/Spinner';
-import { notifyError, notifySuccess } from '../../../lib/toast';
+} from "../api/vehicle3dApi";
+import { LocalModelViewer } from "../../3dgeneration";
+import { Button } from "../../../components/ui/Button";
+import { Card } from "../../../components/ui/Card";
+import { Spinner } from "../../../components/ui/Spinner";
+import { notifyError, notifySuccess } from "../../../lib/toast";
 
-type Slot = 'front' | 'left' | 'back' | 'right';
+type Slot = "front" | "left" | "back" | "right";
 
 function modelUrlHost(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -25,23 +25,25 @@ function modelUrlHost(url: string | null | undefined): string | null {
 }
 
 const SLOTS: { key: Slot; labelKey: string; fallback: string }[] = [
-  { key: 'front', labelKey: 'threeD.viewFront', fallback: 'Front' },
-  { key: 'left', labelKey: 'threeD.viewLeft', fallback: 'Left' },
-  { key: 'back', labelKey: 'threeD.viewBack', fallback: 'Back' },
-  { key: 'right', labelKey: 'threeD.viewRight', fallback: 'Right' },
+  { key: "front", labelKey: "threeD.viewFront", fallback: "Front" },
+  { key: "left", labelKey: "threeD.viewLeft", fallback: "Left" },
+  { key: "back", labelKey: "threeD.viewBack", fallback: "Back" },
+  { key: "right", labelKey: "threeD.viewRight", fallback: "Right" },
 ];
-
-const mockMode = isThreeDMockMode();
 
 export function VendorVehicleGenerate3dPage() {
   const { t } = useTranslation();
   const { id: vehicleId } = useParams<{ id: string }>();
+  const [config, setConfig] = useState<ThreeDGenerationConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [files, setFiles] = useState<Partial<Record<Slot, File>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<ThreeDJobStatusResponse | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mockMode = config?.mockMode ?? false;
 
   const stopPoll = useCallback(() => {
     if (pollRef.current) {
@@ -53,54 +55,99 @@ export function VendorVehicleGenerate3dPage() {
   useEffect(() => () => stopPoll(), [stopPoll]);
 
   useEffect(() => {
+    let cancelled = false;
+    vehicle3dApi
+      .getConfig()
+      .then((data) => {
+        if (!cancelled) setConfig(data);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setConfigError(
+            err instanceof Error
+              ? err.message
+              : "Failed to load 3D configuration",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setConfigLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     if (!vehicleId || !jobId) return;
     stopPoll();
-    pollRef.current = setInterval(() => {
-      vehicle3dApi
-        .getVendorJob(vehicleId, jobId)
-        .then((j) => {
-          console.debug('[3D] poll', {
-            jobId,
-            vehicleId,
-            status: j.status,
-            hasModelUrl: Boolean(j.modelUrl),
-            modelHost: modelUrlHost(j.modelUrl),
-          });
-          setJob(j);
-          if (j.status === 'COMPLETED' || j.status === 'FAILED') {
+    pollRef.current = setInterval(
+      () => {
+        vehicle3dApi
+          .getVendorJob(vehicleId, jobId)
+          .then((j) => {
+            console.debug("[3D] poll", {
+              jobId,
+              vehicleId,
+              status: j.status,
+              hasModelUrl: Boolean(j.modelUrl),
+              modelHost: modelUrlHost(j.modelUrl),
+            });
+            setJob(j);
+            if (j.status === "COMPLETED" || j.status === "FAILED") {
+              stopPoll();
+              if (j.status === "COMPLETED") {
+                console.info("[3D] job completed", {
+                  jobId,
+                  vehicleId,
+                  modelHost: modelUrlHost(j.modelUrl),
+                });
+                notifySuccess(t("threeD.jobComplete", "3D model is ready."));
+              }
+              if (j.status === "FAILED") {
+                console.error("[3D] job failed", {
+                  jobId,
+                  vehicleId,
+                  errorMessage: j.errorMessage,
+                });
+                if (j.errorMessage) notifyError(j.errorMessage);
+              }
+            }
+          })
+          .catch((err: unknown) => {
+            console.error("[3D] poll error", err);
             stopPoll();
-            if (j.status === 'COMPLETED') {
-              console.info('[3D] job completed', {
-                jobId,
-                vehicleId,
-                modelHost: modelUrlHost(j.modelUrl),
-              });
-              notifySuccess(t('threeD.jobComplete', '3D model is ready.'));
-            }
-            if (j.status === 'FAILED') {
-              console.error('[3D] job failed', { jobId, vehicleId, errorMessage: j.errorMessage });
-              if (j.errorMessage) notifyError(j.errorMessage);
-            }
-          }
-        })
-        .catch((err: unknown) => {
-          console.error('[3D] poll error', err);
-          stopPoll();
-        });
-    }, mockMode ? 800 : 2500);
+          });
+      },
+      mockMode ? 800 : 2500,
+    );
     return () => stopPoll();
-  }, [vehicleId, jobId, stopPoll]);
+  }, [vehicleId, jobId, stopPoll, mockMode]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!vehicleId) return;
+    if (!config) {
+      notifyError(
+        t("threeD.configUnavailable", "3D configuration is not loaded yet."),
+      );
+      return;
+    }
+    if (!config.configured) {
+      notifyError(
+        config.message ??
+          t("threeD.serviceUnavailable", "3D service is not configured."),
+      );
+      return;
+    }
     setSubmitting(true);
     setJob(null);
     try {
       let res: { jobId: string };
       if (mockMode) {
         if (!modelFile) {
-          notifyError(t('threeD.needGlb', 'Please upload a GLB file.'));
+          notifyError(t("threeD.needGlb", "Please upload a GLB file."));
           return;
         }
         res = await vehicle3dApi.createVendorJobWithModel(vehicleId, modelFile);
@@ -110,21 +157,39 @@ export function VendorVehicleGenerate3dPage() {
         const back = files.back;
         const right = files.right;
         if (!front || !left || !back || !right) {
-          notifyError(t('threeD.needFour', 'Please upload all four views.'));
+          notifyError(t("threeD.needFour", "Please upload all four views."));
           return;
         }
-        res = await vehicle3dApi.createVendorJob(vehicleId, { front, left, back, right });
+        res = await vehicle3dApi.createVendorJob(vehicleId, {
+          front,
+          left,
+          back,
+          right,
+        });
       }
       setJobId(res.jobId);
-      setJob({ id: res.jobId, status: 'PENDING', errorMessage: null, modelUrl: null });
-      console.info('[3D] job created', { jobId: res.jobId, vehicleId, type: 'vendor', mockMode });
+      setJob({
+        id: res.jobId,
+        status: "PENDING",
+        errorMessage: null,
+        modelUrl: null,
+      });
+      console.info("[3D] job created", {
+        jobId: res.jobId,
+        vehicleId,
+        type: "vendor",
+        mockMode,
+      });
       notifySuccess(
         mockMode
-          ? t('threeD.mockJobStarted', 'Upload started (mock mode).')
-          : t('threeD.jobStarted', 'Generation started. This may take several minutes.'),
+          ? t("threeD.mockJobStarted", "Upload started (mock mode).")
+          : t(
+              "threeD.jobStarted",
+              "Generation started. This may take several minutes.",
+            ),
       );
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Request failed');
+      notifyError(err instanceof Error ? err.message : "Request failed");
     } finally {
       setSubmitting(false);
     }
@@ -136,99 +201,134 @@ export function VendorVehicleGenerate3dPage() {
         <Link to="/vendor/vehicles">
           <Button variant="ghost" size="sm">
             <ArrowLeft size={16} className="me-1 rtl:me-0 rtl:ms-1" />
-            {t('threeD.backToVehicles', 'Vehicles')}
+            {t("threeD.backToVehicles", "Vehicles")}
           </Button>
         </Link>
         <h1 className="text-2xl font-bold text-mesh-text">
-          {t('threeD.vendorTitle', 'Generate 3D (listing)')}
+          {t("threeD.vendorTitle", "Generate 3D (listing)")}
         </h1>
       </div>
 
       <Card>
-        {mockMode && (
-          <p className="text-xs font-medium text-amber-400/90 mb-3 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2">
-            {t('threeD.mockBadge', 'Mock mode — no Tripo credits')}
+        {configLoading && <Spinner label={t("common.loading")} />}
+        {configError && (
+          <p className="text-sm text-red-400" role="alert">
+            {configError}
           </p>
         )}
-        <p className="text-sm text-mesh-muted mb-4">
-          {mockMode
-            ? t(
-                'threeD.vendorHelpMock',
-                'Testing mode: upload a ready-made .glb for this listing (no Tripo).',
-              )
-            : t(
-                'threeD.vendorHelp',
-                'Upload four photos in order: front, left, back, right. Tripo generates a textured GLB; the result is stored for the public 3D view on this listing.',
-              )}
-        </p>
-        <form onSubmit={onSubmit} className="space-y-4">
-          {mockMode ? (
-            <label className="flex flex-col gap-2 rounded-[var(--radius-mesh-sm)] border border-mesh-border bg-white/[0.02] p-4 cursor-pointer hover:border-mesh-gold/30 transition-colors">
-              <span className="text-sm font-medium text-mesh-text flex items-center gap-2">
-                <Upload size={16} className="text-mesh-gold" />
-                {t('threeD.glbFile', '3D model (.glb)')}
-              </span>
-              <input
-                type="file"
-                accept=".glb,model/gltf-binary"
-                className="text-xs text-mesh-muted file:mr-2 file:rounded file:border-0 file:bg-mesh-gold/20 file:px-2 file:py-1 file:text-mesh-text"
-                onChange={(e) => setModelFile(e.target.files?.[0] ?? null)}
-              />
-              {modelFile && (
-                <span className="text-xs text-mesh-muted truncate">{modelFile.name}</span>
-              )}
-            </label>
-          ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {SLOTS.map(({ key, labelKey, fallback }) => (
-              <label
-                key={key}
-                className="flex flex-col gap-2 rounded-[var(--radius-mesh-sm)] border border-mesh-border bg-white/[0.02] p-4 cursor-pointer hover:border-mesh-gold/30 transition-colors"
-              >
-                <span className="text-sm font-medium text-mesh-text flex items-center gap-2">
-                  <Upload size={16} className="text-mesh-gold" />
-                  {t(labelKey, fallback)}
-                </span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="text-xs text-mesh-muted file:mr-2 file:rounded file:border-0 file:bg-mesh-gold/20 file:px-2 file:py-1 file:text-mesh-text"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    setFiles((prev) => (f ? { ...prev, [key]: f } : { ...prev, [key]: undefined }));
-                  }}
-                />
-                {files[key] && (
-                  <span className="text-xs text-mesh-muted truncate">{files[key]!.name}</span>
+        {!configLoading && config?.configured === false && (
+          <p className="text-xs font-medium text-red-400/90 mb-3 rounded-md border border-red-400/30 bg-red-400/10 px-3 py-2">
+            {config.message ??
+              t("threeD.serviceUnavailable", "3D service is not configured.")}
+          </p>
+        )}
+        {!configLoading && !configError && config && (
+          <>
+            {mockMode && (
+              <p className="text-xs font-medium text-amber-400/90 mb-3 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2">
+                {t(
+                  "threeD.demoBadge",
+                  "Demo mode — upload a GLB model directly",
                 )}
-              </label>
-            ))}
-          </div>
-          )}
-          <Button type="submit" loading={submitting} disabled={!vehicleId}>
-            {mockMode
-              ? t('threeD.submitMock', 'Upload model')
-              : t('threeD.submit', 'Start generation')}
-          </Button>
-        </form>
+              </p>
+            )}
+            <p className="text-sm text-mesh-muted mb-4">
+              {mockMode
+                ? t(
+                    "threeD.vendorHelpMock",
+                    "Testing mode: upload a ready-made .glb for this listing (no Tripo).",
+                  )
+                : t(
+                    "threeD.vendorHelp",
+                    "Upload four photos in order: front, left, back, right. Tripo generates a textured GLB; the result is stored for the public 3D view on this listing.",
+                  )}
+            </p>
+            <form onSubmit={onSubmit} className="space-y-4">
+              {mockMode ? (
+                <label className="flex flex-col gap-2 rounded-[var(--radius-mesh-sm)] border border-mesh-border bg-white/[0.02] p-4 cursor-pointer hover:border-mesh-gold/30 transition-colors">
+                  <span className="text-sm font-medium text-mesh-text flex items-center gap-2">
+                    <Upload size={16} className="text-mesh-gold" />
+                    {t("threeD.glbFile", "3D model (.glb)")}
+                  </span>
+                  <input
+                    type="file"
+                    accept=".glb,model/gltf-binary"
+                    className="text-xs text-mesh-muted file:mr-2 file:rounded file:border-0 file:bg-mesh-gold/20 file:px-2 file:py-1 file:text-mesh-text"
+                    onChange={(e) => setModelFile(e.target.files?.[0] ?? null)}
+                  />
+                  {modelFile && (
+                    <span className="text-xs text-mesh-muted truncate">
+                      {modelFile.name}
+                    </span>
+                  )}
+                </label>
+              ) : (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {SLOTS.map(({ key, labelKey, fallback }) => (
+                    <label
+                      key={key}
+                      className="flex flex-col gap-2 rounded-[var(--radius-mesh-sm)] border border-mesh-border bg-white/[0.02] p-4 cursor-pointer hover:border-mesh-gold/30 transition-colors"
+                    >
+                      <span className="text-sm font-medium text-mesh-text flex items-center gap-2">
+                        <Upload size={16} className="text-mesh-gold" />
+                        {t(labelKey, fallback)}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        className="text-xs text-mesh-muted file:mr-2 file:rounded file:border-0 file:bg-mesh-gold/20 file:px-2 file:py-1 file:text-mesh-text"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          setFiles((prev) =>
+                            f
+                              ? { ...prev, [key]: f }
+                              : { ...prev, [key]: undefined },
+                          );
+                        }}
+                      />
+                      {files[key] && (
+                        <span className="text-xs text-mesh-muted truncate">
+                          {files[key]!.name}
+                        </span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )}
+              <Button
+                type="submit"
+                loading={submitting}
+                disabled={!vehicleId || !config.configured}
+              >
+                {mockMode
+                  ? t("threeD.submitMock", "Upload model")
+                  : t("threeD.submit", "Start generation")}
+              </Button>
+            </form>
+          </>
+        )}
       </Card>
 
       {job && (
         <Card>
-          <h2 className="text-sm font-medium text-mesh-muted mb-2">{t('threeD.status', 'Status')}</h2>
+          <h2 className="text-sm font-medium text-mesh-muted mb-2">
+            {t("threeD.status", "Status")}
+          </h2>
           <p className="text-mesh-text font-medium">{job.status}</p>
-          {job.status !== 'COMPLETED' && job.status !== 'FAILED' && (
+          {job.status !== "COMPLETED" && job.status !== "FAILED" && (
             <div className="mt-3 flex items-center gap-2 text-sm text-mesh-muted">
               <Spinner size={18} />
-              {t('threeD.processing', 'Processing on server…')}
+              {t("threeD.processing", "Processing on server…")}
             </div>
           )}
-          {job.status === 'FAILED' && job.errorMessage && (
+          {job.status === "FAILED" && job.errorMessage && (
             <p className="mt-2 text-sm text-red-400">{job.errorMessage}</p>
           )}
-          {job.status === 'COMPLETED' && job.modelUrl && (
+          {job.status === "COMPLETED" && job.modelUrl && (
             <div className="mt-4 space-y-3">
-              <p className="text-sm text-mesh-muted">{t('threeD.preview', 'Preview')}</p>
+              <p className="text-sm text-mesh-muted">
+                {t("threeD.preview", "Preview")}
+              </p>
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
                 <LocalModelViewer src={job.modelUrl} />
               </div>

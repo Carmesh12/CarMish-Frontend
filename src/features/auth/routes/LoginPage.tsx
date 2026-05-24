@@ -12,12 +12,16 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 
+const UNVERIFIED_EMAIL_MESSAGE = 'Please verify your email before logging in.';
+
 export function LoginPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { isAuthenticated, role } = useAuthStore();
   const login = useAuthStore((s) => s.login);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const videoWebm = '/assets/login/carmesh-login-3d.webm';
   const videoMp4 = '/assets/login/carmesh-login-3d.mp4';
   const poster = '/assets/login/carmesh-login-3d-poster.webp';
@@ -36,9 +40,30 @@ export function LoginPage() {
       notifySuccess(t('auth.loginSubtitle'));
       navigate(getAccountHomePath(res.user.role), { replace: true });
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Login failed');
+      const message = err instanceof Error ? err.message : 'Login failed';
+      if (message === UNVERIFIED_EMAIL_MESSAGE) {
+        setUnverifiedEmail(data.email);
+        notifyError(t('auth.verifyBeforeLogin'));
+      } else {
+        setUnverifiedEmail(null);
+        notifyError(message);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const resendVerification = async () => {
+    if (!unverifiedEmail) return;
+
+    setResendLoading(true);
+    try {
+      const res = await authApi.resendVerification(unverifiedEmail);
+      notifySuccess(res.message);
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Could not resend verification email');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -116,6 +141,22 @@ export function LoginPage() {
                   {t('auth.loginButton')}
                 </Button>
               </form>
+
+              {unverifiedEmail && (
+                <div className="mt-5 rounded-[var(--radius-mesh-sm)] border border-mesh-gold/25 bg-mesh-gold/10 p-4 text-center">
+                  <p className="text-sm text-mesh-text">{t('auth.verifyBeforeLogin')}</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    loading={resendLoading}
+                    className="mt-3"
+                    onClick={resendVerification}
+                  >
+                    {t('auth.resendVerification')}
+                  </Button>
+                </div>
+              )}
 
               <p className="text-center text-base text-mesh-muted mt-8">
                 {t('auth.noAccount')}{' '}

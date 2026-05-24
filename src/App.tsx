@@ -9,6 +9,7 @@ import { LoginPage } from './features/auth/routes/LoginPage';
 import { SignupPage } from './features/auth/routes/SignupPage';
 import { ForgotPasswordPage } from './features/auth/routes/ForgotPasswordPage';
 import { ResetPasswordPage } from './features/auth/routes/ResetPasswordPage';
+import { VerifyEmailPage } from './features/auth/routes/VerifyEmailPage';
 import { CatalogPage } from './features/vehicles/routes/CatalogPage';
 import { VehicleDetailPage } from './features/vehicles/routes/VehicleDetailPage';
 import { UserDashboardPage } from './features/user-account/routes/UserDashboardPage';
@@ -39,6 +40,7 @@ function App() {
       <Route path="/signup" element={<AuthLayout hideHeader><SignupPage /></AuthLayout>} />
       <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
       <Route path="/reset-password" element={<AuthLayout><ResetPasswordPage /></AuthLayout>} />
+      <Route path="/verify-email" element={<AuthLayout><VerifyEmailPage /></AuthLayout>} />
 
       {/* Public */}
       <Route path="/" element={<Navigate to="/vehicles" replace />} />

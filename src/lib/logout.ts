@@ -1,6 +1,7 @@
 import type { NavigateFunction } from 'react-router-dom';
 import { getApiBase } from './api';
 import { useAuthStore } from '../stores/authStore';
+import { useNotificationStore } from '../stores/notificationStore';
 import { notifyDismiss, notifyLoading, notifySuccess, notifyWarning } from './toast';
 
 export function performLogout(navigate: NavigateFunction): void {
@@ -24,6 +25,7 @@ export function performLogout(navigate: NavigateFunction): void {
       notifyWarning('You are signed out on this device.');
     } finally {
       useAuthStore.getState().logout();
+      useNotificationStore.getState().clear();
       navigate('/login', { replace: true });
     }
   })();

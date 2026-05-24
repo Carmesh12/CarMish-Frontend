@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Car } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import { ThemeToggle } from '../ThemeToggle';
 
 export function AuthLayout({ children, hideHeader = false }: { children: ReactNode; hideHeader?: boolean }) {
   return (
@@ -15,7 +16,10 @@ export function AuthLayout({ children, hideHeader = false }: { children: ReactNo
             />
             <span className="text-xl font-bold tracking-tight text-gradient-gold">CarMesh</span>
           </Link>
-          <LanguageSwitcher compact />
+          <div className="flex items-center gap-3">
+            <ThemeToggle compact />
+            <LanguageSwitcher compact />
+          </div>
         </header>
       )}
       <main className="relative z-10 flex-1 w-full">

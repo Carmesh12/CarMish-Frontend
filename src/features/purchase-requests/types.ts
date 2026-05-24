@@ -1,3 +1,5 @@
+import type { Vehicle } from "../vehicles/types";
+
 export interface PurchaseRequest {
   id: string;
   vehicleId: string;
@@ -5,7 +7,8 @@ export interface PurchaseRequest {
   vendorId: string;
   offeredPrice: string | null;
   message: string | null;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
   createdAt: string;
   updatedAt: string;
+  vehicle?: Vehicle;
 }

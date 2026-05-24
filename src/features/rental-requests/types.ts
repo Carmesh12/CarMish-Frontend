@@ -1,3 +1,5 @@
+import type { Vehicle } from "../vehicles/types";
+
 export interface RentalRequest {
   id: string;
   vehicleId: string;
@@ -7,7 +9,8 @@ export interface RentalRequest {
   endDate: string;
   totalPrice: string | null;
   message: string | null;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED';
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED" | "COMPLETED";
   createdAt: string;
   updatedAt: string;
+  vehicle?: Vehicle;
 }
