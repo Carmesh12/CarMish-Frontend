@@ -18,6 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Boxes,
+  Users,
+  ShieldCheck,
 } from 'lucide-react';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { ThemeToggle } from '../ThemeToggle';
@@ -49,8 +51,10 @@ function useNavItems(): NavItem[] {
   if (role === 'ADMIN') {
     return [
       { label: t('nav.dashboard'), path: '/admin/dashboard', icon: <LayoutDashboard size={18} /> },
-      { label: t('nav.profile'), path: '/admin/profile', icon: <User size={18} /> },
+      { label: 'Vendor Requests', path: '/admin/vendors', icon: <ShieldCheck size={18} /> },
       { label: t('nav.reports'), path: '/admin/reports', icon: <Flag size={18} /> },
+      { label: 'Accounts', path: '/admin/accounts', icon: <Users size={18} /> },
+      { label: t('nav.profile'), path: '/admin/profile', icon: <User size={18} /> },
     ];
   }
 

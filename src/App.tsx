@@ -24,9 +24,11 @@ import { VehicleManagementPage } from './features/vendor-profile/routes/VehicleM
 import { VehicleFormPage } from './features/vendor-profile/routes/VehicleFormPage';
 import { VendorPurchasesPage } from './features/purchase-requests/routes/VendorPurchasesPage';
 import { VendorRentalsPage } from './features/rental-requests/routes/VendorRentalsPage';
-import { AdminDashboardPage } from './features/admin-profile/routes/AdminDashboardPage';
+import { AdminDashboardPage } from './features/admin/routes/AdminDashboardPage';
 import { AdminProfilePage } from './features/admin-profile/routes/AdminProfilePage';
-import { ReportsManagementPage } from './features/reports/routes/ReportsManagementPage';
+import { ReportsManagementPage } from './features/admin/routes/ReportsManagementPage';
+import { VendorRequestsPage } from './features/admin/routes/VendorRequestsPage';
+import { AccountsManagementPage } from './features/admin/routes/AccountsManagementPage';
 import { LocalModelPreviewPage } from './features/3dgeneration';
 import { VehiclePublic3dPage } from './features/vehicle-3d/routes/VehiclePublic3dPage';
 import { VendorVehicleGenerate3dPage } from './features/vehicle-3d/routes/VendorVehicleGenerate3dPage';
@@ -71,7 +73,9 @@ function App() {
       {/* Admin */}
       <Route path="/admin/dashboard" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><AdminDashboardPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/admin/profile" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><AdminProfilePage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/admin/vendors" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><VendorRequestsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><ReportsManagementPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/admin/accounts" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><AccountsManagementPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
 
       {/* Catch-all */}
       <Route path="*" element={<Navigate to="/vehicles" replace />} />
