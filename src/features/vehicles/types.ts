@@ -22,7 +22,7 @@ export interface Vehicle {
   has3DModel?: boolean;
   threeDModelUrl?: string | null;
   images?: VehicleImage[];
-  vendor?: { businessName: string; contactPersonName: string; logoUrl: string | null };
+  vendor?: { accountId: string; businessName: string; contactPersonName: string; logoUrl: string | null };
 }
 
 export interface VehicleImage {

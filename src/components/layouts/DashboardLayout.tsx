@@ -7,6 +7,7 @@ import {
   User,
   Heart,
   MessageSquareText,
+  MessageSquare,
   ShoppingCart,
   CalendarClock,
   Truck,
@@ -45,6 +46,7 @@ function useNavItems(): NavItem[] {
       { label: t('vendor.addVehicle'), path: '/vendor/vehicles/new', icon: <PlusCircle size={18} /> },
       { label: t('nav.purchases'), path: '/vendor/purchases', icon: <ShoppingCart size={18} /> },
       { label: t('nav.rentals'), path: '/vendor/rentals', icon: <CalendarClock size={18} /> },
+      { label: 'Messages', path: '/vendor/messages', icon: <MessageSquare size={18} /> },
     ];
   }
 
@@ -54,6 +56,7 @@ function useNavItems(): NavItem[] {
       { label: 'Vendor Requests', path: '/admin/vendors', icon: <ShieldCheck size={18} /> },
       { label: t('nav.reports'), path: '/admin/reports', icon: <Flag size={18} /> },
       { label: 'Accounts', path: '/admin/accounts', icon: <Users size={18} /> },
+      { label: 'Messages', path: '/admin/messages', icon: <MessageSquare size={18} /> },
       { label: t('nav.profile'), path: '/admin/profile', icon: <User size={18} /> },
     ];
   }
@@ -64,6 +67,7 @@ function useNavItems(): NavItem[] {
     { label: t('nav.favorites'), path: '/user/favorites', icon: <Heart size={18} /> },
     { label: t('nav.my3d'), path: '/user/personal-3d', icon: <Boxes size={18} /> },
     { label: 'Chatbot', path: '/user/chat', icon: <MessageSquareText size={18} /> },
+    { label: 'Messages', path: '/user/messages', icon: <MessageSquare size={18} /> },
     { label: t('nav.purchases'), path: '/user/purchases', icon: <ShoppingCart size={18} /> },
     { label: t('nav.rentals'), path: '/user/rentals', icon: <CalendarClock size={18} /> },
   ];

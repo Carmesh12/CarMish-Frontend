@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, MessageSquare } from 'lucide-react';
 import { rentalRequestsApi } from '../api/rentalRequestsApi';
 import type { RentalRequest } from '../types';
 import { Card } from '../../../components/ui/Card';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Badge } from '../../../components/ui/Badge';
+import { Button } from '../../../components/ui/Button';
 import { EmptyState } from '../../../components/ui/EmptyState';
+import { findOrCreateRequestConversation } from '../../messaging/api';
+import { notifyError } from '../../../lib/toast';
 
 const STATUS_VARIANT: Record<string, 'warning' | 'success' | 'danger' | 'info' | 'default'> = {
   PENDING: 'warning',
@@ -18,9 +22,28 @@ const STATUS_VARIANT: Record<string, 'warning' | 'success' | 'danger' | 'info' |
 
 export function UserRentalsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<RentalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chattingId, setChattingId] = useState<string | null>(null);
+
+  const handleChat = async (req: RentalRequest) => {
+    if (!req.vendor?.accountId) return;
+    setChattingId(req.id);
+    try {
+      await findOrCreateRequestConversation({
+        vendorAccountId: req.vendor.accountId,
+        context: 'RENTAL_REQUEST',
+        contextEntityId: req.id,
+      });
+      navigate('/user/messages');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Failed to open chat');
+    } finally {
+      setChattingId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +82,7 @@ export function UserRentalsPage() {
                   <th className="text-start p-4">{t('rental.totalPrice')}</th>
                   <th className="text-start p-4">{t('common.status')}</th>
                   <th className="text-start p-4 hidden sm:table-cell">{t('common.date')}</th>
+                  <th className="text-start p-4">Chat</th>
                 </tr>
               </thead>
               <tbody>
@@ -79,6 +103,11 @@ export function UserRentalsPage() {
                     </td>
                     <td className="p-4 text-mesh-muted hidden sm:table-cell">
                       {new Date(req.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-4">
+                      <Button variant="ghost" size="sm" loading={chattingId === req.id} onClick={() => handleChat(req)} title="Chat with Vendor">
+                        <MessageSquare size={14} className="text-mesh-gold" />
+                      </Button>
                     </td>
                   </tr>
                 ))}

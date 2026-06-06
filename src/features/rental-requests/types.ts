@@ -13,4 +13,6 @@ export interface RentalRequest {
   createdAt: string;
   updatedAt: string;
   vehicle?: Vehicle;
+  vendor?: { accountId: string; businessName: string };
+  user?: { accountId: string };
 }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Heart,
@@ -16,6 +16,7 @@ import {
   ChevronRight,
   ArrowLeft,
   Box,
+  MessageSquare,
 } from "lucide-react";
 
 import { vehiclesApi } from "../api/vehiclesApi";
@@ -25,6 +26,7 @@ import { purchaseRequestsApi } from "../../purchase-requests/api/purchaseRequest
 import { rentalRequestsApi } from "../../rental-requests/api/rentalRequestsApi";
 import { reportsApi } from "../../reports/api/reportsApi";
 import { useAuthStore } from "../../../stores/authStore";
+import { createConversation } from "../../messaging/api";
 import { Button } from "../../../components/ui/Button";
 import { Input } from "../../../components/ui/Input";
 import { Textarea } from "../../../components/ui/Textarea";
@@ -48,6 +50,7 @@ const REPORT_REASONS = [
 export function VehicleDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isAuthenticated, role } = useAuthStore();
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
@@ -82,6 +85,7 @@ export function VehicleDetailPage() {
   const [reportReason, setReportReason] = useState("");
   const [reportDescription, setReportDescription] = useState("");
   const [reportLoading, setReportLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
 
   const isUser = isAuthenticated && role === "USER";
 
@@ -228,6 +232,24 @@ export function VehicleDetailPage() {
       notifyError(t("detail.reportError", "Failed to submit report"));
     } finally {
       setReportLoading(false);
+    }
+  }
+
+  async function messageVendor() {
+    if (!id || !vehicle?.vendor?.accountId || messageLoading) return;
+    setMessageLoading(true);
+    try {
+      await createConversation({
+        vendorAccountId: vehicle.vendor.accountId,
+        context: 'GENERAL',
+        vehicleId: id,
+        message: `Hi, I'm interested in ${vehicle.title}. Could you provide more details?`,
+      });
+      navigate('/user/messages');
+    } catch {
+      notifyError(t('detail.messageError', 'Failed to start conversation'));
+    } finally {
+      setMessageLoading(false);
     }
   }
 
@@ -648,6 +670,18 @@ export function VehicleDetailPage() {
                     >
                       <KeyRound size={18} />
                       {t("detail.rentVehicle", "Rent This Vehicle")}
+                    </Button>
+                  )}
+                  {vehicle.vendor?.accountId && (
+                    <Button
+                      fullWidth
+                      variant="outline"
+                      onClick={messageVendor}
+                      loading={messageLoading}
+                      className="flex items-center justify-center gap-2"
+                    >
+                      <MessageSquare size={18} />
+                      {t("detail.messageVendor", "Message Vendor")}
                     </Button>
                   )}
                   <Button

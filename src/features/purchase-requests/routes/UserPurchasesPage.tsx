@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, MessageSquare } from 'lucide-react';
 import { purchaseRequestsApi } from '../api/purchaseRequestsApi';
 import type { PurchaseRequest } from '../types';
 import { Card } from '../../../components/ui/Card';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Badge } from '../../../components/ui/Badge';
+import { Button } from '../../../components/ui/Button';
 import { EmptyState } from '../../../components/ui/EmptyState';
+import { findOrCreateRequestConversation } from '../../messaging/api';
+import { notifyError } from '../../../lib/toast';
 
 const STATUS_VARIANT: Record<string, 'warning' | 'success' | 'danger' | 'info' | 'default'> = {
   PENDING: 'warning',
@@ -18,9 +22,28 @@ const STATUS_VARIANT: Record<string, 'warning' | 'success' | 'danger' | 'info' |
 
 export function UserPurchasesPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<PurchaseRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chattingId, setChattingId] = useState<string | null>(null);
+
+  const handleChat = async (req: PurchaseRequest) => {
+    if (!req.vendor?.accountId) return;
+    setChattingId(req.id);
+    try {
+      await findOrCreateRequestConversation({
+        vendorAccountId: req.vendor.accountId,
+        context: 'PURCHASE_REQUEST',
+        contextEntityId: req.id,
+      });
+      navigate('/user/messages');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Failed to open chat');
+    } finally {
+      setChattingId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -58,6 +81,7 @@ export function UserPurchasesPage() {
                   <th className="text-start p-4 hidden sm:table-cell">{t('common.message')}</th>
                   <th className="text-start p-4">{t('common.status')}</th>
                   <th className="text-start p-4">{t('common.date')}</th>
+                  <th className="text-start p-4">Chat</th>
                 </tr>
               </thead>
               <tbody>
@@ -79,6 +103,11 @@ export function UserPurchasesPage() {
                     </td>
                     <td className="p-4 text-mesh-muted">
                       {new Date(req.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-4">
+                      <Button variant="ghost" size="sm" loading={chattingId === req.id} onClick={() => handleChat(req)} title="Chat with Vendor">
+                        <MessageSquare size={14} className="text-mesh-gold" />
+                      </Button>
                     </td>
                   </tr>
                 ))}

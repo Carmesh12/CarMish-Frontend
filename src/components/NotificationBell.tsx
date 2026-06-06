@@ -39,6 +39,16 @@ function getNotificationPath(notification: Notification, role: string | null) {
     return role === 'ADMIN' ? '/admin/reports' : null;
   }
 
+  if (notification.relatedEntityType === 'OTHER') {
+    if (role === 'VENDOR') return '/vendor/messages';
+    if (role === 'ADMIN') return '/admin/messages';
+  }
+
+  if (notification.type === 'CONVERSATION_MESSAGE_RECEIVED' || notification.type === 'CONVERSATION_NEW') {
+    if (role === 'USER') return '/user/messages';
+    if (role === 'VENDOR') return '/vendor/messages';
+  }
+
   return null;
 }
 

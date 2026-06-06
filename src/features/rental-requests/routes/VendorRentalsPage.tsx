@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CalendarDays, Check, X } from "lucide-react";
+import { CalendarDays, Check, X, MessageSquare } from "lucide-react";
 import { rentalRequestsApi } from "../api/rentalRequestsApi";
 import type { RentalRequest } from "../types";
 import { notifySuccess, notifyError } from "../../../lib/toast";
@@ -9,6 +10,8 @@ import { Spinner } from "../../../components/ui/Spinner";
 import { Badge } from "../../../components/ui/Badge";
 import { Button } from "../../../components/ui/Button";
 import { EmptyState } from "../../../components/ui/EmptyState";
+import { useAuthStore } from "../../../stores/authStore";
+import { findOrCreateRequestConversation } from "../../messaging/api";
 
 const STATUS_VARIANT: Record<
   string,
@@ -33,10 +36,31 @@ const AVAILABILITY_VARIANT: Record<
 
 export function VendorRentalsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const accountId = useAuthStore((s) => s.user?.id) ?? '';
   const [requests, setRequests] = useState<RentalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [chattingId, setChattingId] = useState<string | null>(null);
+
+  const handleChat = async (req: RentalRequest) => {
+    if (!req.user?.accountId) return;
+    setChattingId(req.id);
+    try {
+      await findOrCreateRequestConversation({
+        vendorAccountId: accountId,
+        userAccountId: req.user.accountId,
+        context: 'RENTAL_REQUEST',
+        contextEntityId: req.id,
+      });
+      navigate('/vendor/messages');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Failed to open chat');
+    } finally {
+      setChattingId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +138,7 @@ export function VendorRentalsPage() {
                   </th>
                   <th className="text-start p-4">{t("common.status")}</th>
                   <th className="text-start p-4">{t("common.actions")}</th>
+                  <th className="text-start p-4">Chat</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,6 +216,11 @@ export function VendorRentalsPage() {
                         ) : (
                           <span className="text-mesh-muted text-xs">—</span>
                         )}
+                      </td>
+                      <td className="p-4">
+                        <Button variant="ghost" size="sm" loading={chattingId === req.id} onClick={() => handleChat(req)} title="Chat with Customer">
+                          <MessageSquare size={14} className="text-mesh-gold" />
+                        </Button>
                       </td>
                     </tr>
                   );
