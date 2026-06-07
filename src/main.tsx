@@ -8,6 +8,16 @@ import { AppToastContainer } from './components/AppToastContainer';
 import { useAuthStore } from './stores/authStore';
 import { useThemeStore } from './stores/themeStore';
 
+window.onerror = (...args) => {
+  console.error('GLOBAL_ERROR', args);
+};
+
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('UNHANDLED_REJECTION', event.reason);
+});
+
+console.log('APP_STARTED');
+
 useAuthStore.getState().hydrate();
 useThemeStore.getState().hydrate();
 

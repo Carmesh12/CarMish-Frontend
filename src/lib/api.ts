@@ -1,11 +1,13 @@
 const API_BASE =
   typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL
     ? import.meta.env.VITE_API_URL
-    : 'http://localhost:3000';
+    : 'http://192.168.1.20:3000';
 
 export function getApiBase(): string {
   return API_BASE.replace(/\/$/, '');
 }
+
+console.log('[api] API base URL:', getApiBase());
 
 export function resolveMediaUrl(
   stored: string | null | undefined,
