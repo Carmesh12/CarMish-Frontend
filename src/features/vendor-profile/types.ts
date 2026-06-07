@@ -1,3 +1,5 @@
+import type { Vehicle } from '../vehicles/types';
+
 export type ProfileCompletion = {
   percentage: number;
   completedFields: string[];
@@ -91,6 +93,20 @@ export type VendorProfileResponse = {
   accountUpdatedAt: string;
   profileCreatedAt: string;
   profileUpdatedAt: string;
+};
+
+export type PublicVendorProfileResponse = {
+  accountId: string;
+  email: string;
+  businessName: string;
+  contactPersonName: string;
+  phoneNumber: string | null;
+  businessAddress: string | null;
+  logoUrl: string | null;
+  verificationStatus: string;
+  memberSince: string;
+  profileCreatedAt: string;
+  vehicles: Vehicle[];
 };
 
 export type VendorDashboardResponse = {

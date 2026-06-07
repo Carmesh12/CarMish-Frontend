@@ -36,7 +36,15 @@ export const authApi = {
   login: (body: { email: string; password: string }) =>
     post<AuthResponse>('/auth/login', body),
 
-  signupUser: (body: { email: string; password: string; firstName: string; lastName: string; phoneNumber?: string }) =>
+  signupUser: (body: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    city: string;
+    address?: string;
+  }) =>
     post<AuthMessageResponse>('/auth/signup', body),
 
   signupVendor: (body: { email: string; password: string; businessName: string; contactPersonName: string; phoneNumber?: string; businessAddress?: string }) =>

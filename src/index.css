@@ -72,6 +72,27 @@ html[data-theme="light"] {
     transition: background-color 200ms ease, color 200ms ease;
   }
 
+  html.lang-ar body {
+    font-family: "Tajawal", "Noto Kufi Arabic", "Cairo", "Segoe UI", Tahoma, Arial, sans-serif;
+    letter-spacing: 0;
+    text-rendering: optimizeLegibility;
+  }
+
+  html.lang-ar input,
+  html.lang-ar textarea,
+  html.lang-ar select,
+  html.lang-ar button {
+    font-family: inherit;
+  }
+
+  html[dir="rtl"] input[type="email"],
+  html[dir="rtl"] input[type="url"],
+  html[dir="rtl"] input[type="tel"],
+  html[dir="rtl"] input[type="number"] {
+    direction: ltr;
+    text-align: right;
+  }
+
   #root {
     @apply min-h-screen;
   }

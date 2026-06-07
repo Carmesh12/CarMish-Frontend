@@ -18,35 +18,83 @@ import { Spinner } from '../../../components/ui/Spinner';
 import { ImageUpload } from '../../../components/ui/ImageUpload';
 
 interface VehicleForm {
-  title: string;
+  title?: string;
   description?: string;
   brand: string;
   model: string;
+  trim?: string;
   year: number;
-  color?: string;
-  fuelType?: string;
-  transmission?: string;
+  condition: 'NEW' | 'USED';
+  color: string;
+  fuelType: string;
+  engineType: string;
+  engineCapacity: string;
+  horsepower: number;
+  transmission: string;
+  drivetrain: string;
+  cylinders?: number | '';
+  acceleration: number;
+  topSpeed: number;
+  fuelConsumption: number;
+  fuelTankCapacity: number;
+  bodyType: string;
+  doors: number;
+  wheelsSize?: string;
+  seats: number;
+  interiorMaterial: string;
+  hasSunroof: boolean;
+  hasNavigation: boolean;
+  hasBluetooth: boolean;
+  hasCamera: boolean;
   mileage?: number | '';
   price?: number | '';
+  currency: 'USD' | 'JOD';
+  negotiable: boolean;
   rentalPricePerDay?: number | '';
   listingType: 'SALE' | 'RENT' | 'BOTH';
-  locationCity?: string;
+  vinNumber?: string;
+  locationCity: string;
+  locationCountry: string;
 }
 
 const vehicleSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().optional(),
   description: z.string().optional(),
   brand: z.string().min(1),
   model: z.string().min(1),
+  trim: z.string().optional(),
   year: z.coerce.number().min(1900).max(new Date().getFullYear() + 1),
-  color: z.string().optional(),
-  fuelType: z.string().optional(),
-  transmission: z.string().optional(),
+  condition: z.enum(['NEW', 'USED']),
+  color: z.string().min(1),
+  fuelType: z.string().min(1),
+  engineType: z.string().min(1),
+  engineCapacity: z.string().min(1),
+  horsepower: z.coerce.number().min(1),
+  transmission: z.string().min(1),
+  drivetrain: z.string().min(1),
+  cylinders: z.coerce.number().min(1).optional().or(z.literal('')),
+  acceleration: z.coerce.number().min(1),
+  topSpeed: z.coerce.number().min(1),
+  fuelConsumption: z.coerce.number().min(0),
+  fuelTankCapacity: z.coerce.number().min(0),
+  bodyType: z.string().min(1),
+  doors: z.coerce.number().min(2),
+  wheelsSize: z.string().optional(),
+  seats: z.coerce.number().min(1),
+  interiorMaterial: z.string().min(1),
+  hasSunroof: z.preprocess((value) => value === true || value === 'true', z.boolean()),
+  hasNavigation: z.preprocess((value) => value === true || value === 'true', z.boolean()),
+  hasBluetooth: z.preprocess((value) => value === true || value === 'true', z.boolean()),
+  hasCamera: z.preprocess((value) => value === true || value === 'true', z.boolean()),
   mileage: z.coerce.number().min(0).optional().or(z.literal('')),
   price: z.coerce.number().min(0).optional().or(z.literal('')),
+  currency: z.enum(['USD', 'JOD']),
+  negotiable: z.preprocess((value) => value === true || value === 'true', z.boolean()),
   rentalPricePerDay: z.coerce.number().min(0).optional().or(z.literal('')),
   listingType: z.enum(['SALE', 'RENT', 'BOTH']),
-  locationCity: z.string().optional(),
+  vinNumber: z.string().optional(),
+  locationCity: z.string().min(1),
+  locationCountry: z.string().min(1),
 });
 
 export function VehicleFormPage() {
@@ -64,7 +112,26 @@ export function VehicleFormPage() {
 
   const form = useForm<VehicleForm>({
     resolver: zodResolver(vehicleSchema) as never,
-    defaultValues: { listingType: 'SALE' },
+    defaultValues: {
+      listingType: 'SALE',
+      condition: 'USED',
+      fuelType: 'PETROL',
+      engineType: 'PETROL',
+      engineCapacity: '2.0L',
+      transmission: 'AUTOMATIC',
+      drivetrain: 'FWD',
+      bodyType: 'SEDAN',
+      doors: 4,
+      seats: 5,
+      interiorMaterial: 'FABRIC',
+      hasSunroof: false,
+      hasNavigation: true,
+      hasBluetooth: true,
+      hasCamera: true,
+      currency: 'USD',
+      negotiable: true,
+      locationCountry: 'Jordan',
+    },
   });
 
   const listingType = form.watch('listingType');
@@ -85,18 +152,42 @@ export function VehicleFormPage() {
           description: vehicle.description ?? '',
           brand: vehicle.brand,
           model: vehicle.model,
+          trim: vehicle.trim ?? '',
           year: vehicle.year,
-          color: vehicle.color ?? '',
-          fuelType: vehicle.fuelType ?? '',
-          transmission: vehicle.transmission ?? '',
+          condition: vehicle.condition,
+          color: vehicle.color ?? 'White',
+          fuelType: vehicle.fuelType ?? vehicle.engineType,
+          engineType: vehicle.engineType,
+          engineCapacity: vehicle.engineCapacity,
+          horsepower: vehicle.horsepower,
+          transmission: vehicle.transmission ?? 'AUTOMATIC',
+          drivetrain: vehicle.drivetrain,
+          cylinders: vehicle.cylinders ?? ('' as unknown as undefined),
+          acceleration: vehicle.acceleration ? Number(vehicle.acceleration) : 8.5,
+          topSpeed: vehicle.topSpeed ?? 180,
+          fuelConsumption: vehicle.fuelConsumption ? Number(vehicle.fuelConsumption) : 7.5,
+          fuelTankCapacity: vehicle.fuelTankCapacity ?? 55,
+          bodyType: vehicle.bodyType,
+          doors: vehicle.doors,
+          wheelsSize: vehicle.wheelsSize ?? '',
+          seats: vehicle.seats,
+          interiorMaterial: vehicle.interiorMaterial,
+          hasSunroof: vehicle.hasSunroof,
+          hasNavigation: vehicle.hasNavigation,
+          hasBluetooth: vehicle.hasBluetooth,
+          hasCamera: vehicle.hasCamera,
           mileage: vehicle.mileage ?? ('' as unknown as undefined),
           price: vehicle.price ? Number(vehicle.price) : ('' as unknown as undefined),
+          currency: vehicle.currency,
+          negotiable: vehicle.negotiable,
           rentalPricePerDay: vehicle.rentalPricePerDay ? Number(vehicle.rentalPricePerDay) : ('' as unknown as undefined),
           listingType: vehicle.listingType,
-          locationCity: vehicle.locationCity ?? '',
+          vinNumber: vehicle.vinNumber ?? '',
+          locationCity: vehicle.locationCity ?? 'Amman',
+          locationCountry: vehicle.locationCountry,
         });
       } catch (e: unknown) {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load vehicle');
+        if (!cancelled) setError(e instanceof Error ? e.message : t('vehicles.loadError'));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -106,9 +197,30 @@ export function VehicleFormPage() {
 
   const onSubmit = async (data: VehicleForm) => {
     const body: Record<string, unknown> = { ...data };
+    if (!isEdit && newFiles.length < 3) {
+      notifyError('Please upload at least 3 vehicle images');
+      return;
+    }
+    if (!isEdit && newFiles.length > 8) {
+      notifyError('A vehicle can have at most 8 images');
+      return;
+    }
+    if (isEdit && existingImages.length + newFiles.length > 8) {
+      notifyError('A vehicle can have at most 8 images');
+      return;
+    }
+    if (data.condition === 'USED' && (data.mileage === '' || data.mileage == null)) {
+      notifyError(t('vehicles.mileageRequiredUsed'));
+      return;
+    }
     if (typeof body.mileage === 'string' && body.mileage === '') delete body.mileage;
+    if (typeof body.cylinders === 'string' && body.cylinders === '') delete body.cylinders;
     if (typeof body.price === 'string' && body.price === '') delete body.price;
     if (typeof body.rentalPricePerDay === 'string' && body.rentalPricePerDay === '') delete body.rentalPricePerDay;
+    if (typeof body.trim === 'string' && body.trim.trim() === '') delete body.trim;
+    if (typeof body.wheelsSize === 'string' && body.wheelsSize.trim() === '') delete body.wheelsSize;
+    if (typeof body.vinNumber === 'string' && body.vinNumber.trim() === '') delete body.vinNumber;
+    delete body.title;
 
     try {
       let vehicle: Vehicle;
@@ -127,7 +239,7 @@ export function VehicleFormPage() {
       notifySuccess(isEdit ? t('profile.updateSuccess') : t('vendor.addVehicle'));
       navigate('/vendor/vehicles');
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Save failed');
+      notifyError(err instanceof Error ? err.message : t('vehicles.saveError'));
     }
   };
 
@@ -138,7 +250,7 @@ export function VehicleFormPage() {
       setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
       notifySuccess(t('vendor.deleteImage'));
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Delete failed');
+      notifyError(err instanceof Error ? err.message : t('vehicles.deleteError'));
     } finally {
       setImageActionId(null);
     }
@@ -153,7 +265,7 @@ export function VehicleFormPage() {
       );
       notifySuccess(t('vendor.setPrimary'));
     } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Failed');
+      notifyError(err instanceof Error ? err.message : t('vehicles.actionError'));
     } finally {
       setImageActionId(null);
     }
@@ -178,6 +290,42 @@ export function VehicleFormPage() {
     { value: 'SALE', label: t('vehicles.forSale') },
     { value: 'RENT', label: t('vehicles.forRent') },
     { value: 'BOTH', label: t('vehicles.saleAndRent') },
+  ];
+
+  const conditionOptions = [
+    { value: 'NEW', label: t('vehicles.conditionNew') },
+    { value: 'USED', label: t('vehicles.conditionUsed') },
+  ];
+
+  const drivetrainOptions = [
+    { value: 'FWD', label: t('vehicles.fwd') },
+    { value: 'RWD', label: t('vehicles.rwd') },
+    { value: 'AWD', label: t('vehicles.awd') },
+    { value: 'FOUR_WD', label: t('vehicles.fourWd') },
+  ];
+
+  const bodyTypeOptions = [
+    { value: 'SUV', label: t('vehicles.suv') },
+    { value: 'SEDAN', label: t('vehicles.sedan') },
+    { value: 'HATCHBACK', label: t('vehicles.hatchback') },
+    { value: 'COUPE', label: t('vehicles.coupe') },
+    { value: 'TRUCK', label: t('vehicles.truck') },
+  ];
+
+  const interiorMaterialOptions = [
+    { value: 'LEATHER', label: t('vehicles.leather') },
+    { value: 'FABRIC', label: t('vehicles.fabric') },
+    { value: 'MIXED', label: t('vehicles.mixed') },
+  ];
+
+  const booleanOptions = [
+    { value: 'true', label: t('common.yes') },
+    { value: 'false', label: t('common.no') },
+  ];
+
+  const currencyOptions = [
+    { value: 'USD', label: 'USD' },
+    { value: 'JOD', label: 'JOD' },
   ];
 
   if (loading) return <Spinner label={t('common.loading')} />;
@@ -231,32 +379,158 @@ export function VehicleFormPage() {
                 {...form.register('year')}
               />
               <Input
-                label={t('vehicles.color')}
+                label={t('detail.trim')}
                 placeholder={t('common.optional')}
+                {...form.register('trim')}
+              />
+              <Select
+                label={t('detail.condition')}
+                options={conditionOptions}
+                error={form.formState.errors.condition?.message}
+                {...form.register('condition')}
+              />
+              <Input
+                label={t('vehicles.color')}
+                error={form.formState.errors.color?.message}
                 {...form.register('color')}
               />
               <Select
                 label={t('vehicles.fuelType')}
-                placeholder={t('common.optional')}
                 options={fuelOptions}
+                error={form.formState.errors.fuelType?.message}
                 {...form.register('fuelType')}
               />
               <Select
+                label={t('vehicles.engineType', 'Engine Type')}
+                options={fuelOptions.filter((option) => option.value !== 'GAS')}
+                error={form.formState.errors.engineType?.message}
+                {...form.register('engineType')}
+              />
+              <Input
+                label={t('vehicles.engineCapacity', 'Engine Capacity')}
+                placeholder="2.0L"
+                error={form.formState.errors.engineCapacity?.message}
+                {...form.register('engineCapacity')}
+              />
+              <Input
+                label={t('vehicles.horsepower')}
+                type="number"
+                error={form.formState.errors.horsepower?.message}
+                {...form.register('horsepower')}
+              />
+              <Select
                 label={t('vehicles.transmission')}
-                placeholder={t('common.optional')}
                 options={transmissionOptions}
+                error={form.formState.errors.transmission?.message}
                 {...form.register('transmission')}
+              />
+              <Select
+                label={t('detail.drivetrain')}
+                options={drivetrainOptions}
+                error={form.formState.errors.drivetrain?.message}
+                {...form.register('drivetrain')}
+              />
+              <Input
+                label={t('vehicles.cylinders')}
+                type="number"
+                placeholder={t('common.optional')}
+                {...form.register('cylinders')}
+              />
+              <Input
+                label="0-100 km/h (sec)"
+                type="number"
+                step="0.1"
+                error={form.formState.errors.acceleration?.message}
+                {...form.register('acceleration')}
+              />
+              <Input
+                label={t('detail.topSpeed')}
+                type="number"
+                error={form.formState.errors.topSpeed?.message}
+                {...form.register('topSpeed')}
+              />
+              <Input
+                label="Fuel Consumption (L/100km)"
+                type="number"
+                step="0.1"
+                error={form.formState.errors.fuelConsumption?.message}
+                {...form.register('fuelConsumption')}
+              />
+              <Input
+                label={t('vehicles.fuelTankCapacity')}
+                type="number"
+                error={form.formState.errors.fuelTankCapacity?.message}
+                {...form.register('fuelTankCapacity')}
+              />
+              <Select
+                label={t('vehicles.bodyType', 'Body Type')}
+                options={bodyTypeOptions}
+                error={form.formState.errors.bodyType?.message}
+                {...form.register('bodyType')}
+              />
+              <Input
+                label={t('vehicles.doors')}
+                type="number"
+                error={form.formState.errors.doors?.message}
+                {...form.register('doors')}
+              />
+              <Input
+                label={t('vehicles.wheelSize')}
+                placeholder={t('common.optional')}
+                {...form.register('wheelsSize')}
+              />
+              <Input
+                label={t('vehicles.seats')}
+                type="number"
+                error={form.formState.errors.seats?.message}
+                {...form.register('seats')}
+              />
+              <Select
+                label={t('vehicles.interiorMaterial', 'Interior Material')}
+                options={interiorMaterialOptions}
+                error={form.formState.errors.interiorMaterial?.message}
+                {...form.register('interiorMaterial')}
+              />
+              <Select
+                label={t('vehicles.sunroof')}
+                options={booleanOptions}
+                {...form.register('hasSunroof')}
+              />
+              <Select
+                label={t('vehicles.navigation')}
+                options={booleanOptions}
+                {...form.register('hasNavigation')}
+              />
+              <Select
+                label={t('vehicles.bluetooth')}
+                options={booleanOptions}
+                {...form.register('hasBluetooth')}
+              />
+              <Select
+                label={t('vehicles.camera')}
+                options={booleanOptions}
+                {...form.register('hasCamera')}
               />
               <Input
                 label={t('vehicles.mileage')}
                 type="number"
-                placeholder={t('common.optional')}
+                error={form.formState.errors.mileage?.message}
                 {...form.register('mileage')}
               />
               <Input
-                label={t('vehicles.city')}
+                label="VIN"
                 placeholder={t('common.optional')}
+                {...form.register('vinNumber')}
+              />
+              <Input
+                label={t('vehicles.city')}
+                error={form.formState.errors.locationCity?.message}
                 {...form.register('locationCity')}
+              />
+              <Input
+                label={t('vehicles.country')}
+                error={form.formState.errors.locationCountry?.message}
+                {...form.register('locationCountry')}
               />
             </div>
           </div>
@@ -274,6 +548,19 @@ export function VehicleFormPage() {
               error={form.formState.errors.listingType?.message}
               {...form.register('listingType')}
             />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Select
+                label={t('vehicles.currency')}
+                options={currencyOptions}
+                error={form.formState.errors.currency?.message}
+                {...form.register('currency')}
+              />
+              <Select
+                label={t('vehicles.negotiable')}
+                options={booleanOptions}
+                {...form.register('negotiable')}
+              />
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {(listingType === 'SALE' || listingType === 'BOTH') && (
                 <Input
@@ -344,7 +631,7 @@ export function VehicleFormPage() {
               </div>
             )}
 
-            <ImageUpload images={newFiles} onChange={setNewFiles} max={10 - existingImages.length} />
+            <ImageUpload images={newFiles} onChange={setNewFiles} max={Math.max(0, 8 - existingImages.length)} />
           </Card>
         )}
 
@@ -354,7 +641,7 @@ export function VehicleFormPage() {
             <h2 className="text-sm font-medium uppercase tracking-wider text-mesh-muted mb-4">
               {t('vendor.images')}
             </h2>
-            <ImageUpload images={newFiles} onChange={setNewFiles} max={10} />
+            <ImageUpload images={newFiles} onChange={setNewFiles} max={8} />
           </Card>
         )}
 

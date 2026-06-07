@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Send, ArrowLeft } from 'lucide-react';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Badge } from '../../../components/ui/Badge';
+import { resolveMediaUrl } from '../../../lib/api';
+import type { MessageSenderAccount } from '../api';
 
 type Message = {
   id: string;
@@ -9,7 +13,7 @@ type Message = {
   body: string;
   isRead: boolean;
   createdAt: string;
-  senderAccount?: { email: string; role: string };
+  senderAccount?: MessageSenderAccount;
 };
 
 type ChatViewProps = {
@@ -23,7 +27,75 @@ type ChatViewProps = {
   subtitle?: string;
 };
 
+function getSenderDisplayName(sender: MessageSenderAccount | undefined): string {
+  if (!sender) return 'Other';
+  if (sender.role === 'VENDOR' && sender.vendor?.businessName) {
+    return sender.vendor.businessName;
+  }
+  if (sender.role === 'USER' && sender.user) {
+    return `${sender.user.firstName} ${sender.user.lastName}`.trim();
+  }
+  if (sender.role === 'ADMIN' && sender.admin) {
+    return `${sender.admin.firstName} ${sender.admin.lastName}`.trim();
+  }
+  return sender.email.split('@')[0] || 'Other';
+}
+
+function getSenderImageUrl(sender: MessageSenderAccount | undefined): string | null {
+  if (sender?.role === 'VENDOR') return resolveMediaUrl(sender.vendor?.logoUrl);
+  if (sender?.role === 'USER') return resolveMediaUrl(sender.user?.profileImageUrl);
+  return null;
+}
+
+function getSenderProfilePath(
+  sender: MessageSenderAccount | undefined,
+  accountId: string,
+): string | null {
+  if (sender?.role === 'VENDOR') return `/vendors/${accountId}`;
+  if (sender?.role === 'USER') return `/users/${accountId}`;
+  return null;
+}
+
+function SenderAvatar({
+  sender,
+  accountId,
+}: {
+  sender: MessageSenderAccount | undefined;
+  accountId: string;
+}) {
+  const displayName = getSenderDisplayName(sender);
+  const imageUrl = getSenderImageUrl(sender);
+  const profilePath = getSenderProfilePath(sender, accountId);
+  const avatar = imageUrl ? (
+    <img
+      src={imageUrl}
+      alt={displayName}
+      className="w-8 h-8 rounded-full object-cover ring-1 ring-mesh-gold/20"
+    />
+  ) : (
+    <span className="w-8 h-8 rounded-full bg-gradient-to-br from-mesh-gold/25 to-mesh-accent/15 text-mesh-gold text-xs font-bold flex items-center justify-center ring-1 ring-mesh-gold/15">
+      {(displayName.charAt(0) || '?').toUpperCase()}
+    </span>
+  );
+
+  if (!profilePath) {
+    return <div className="shrink-0 mt-1">{avatar}</div>;
+  }
+
+  return (
+    <Link
+      to={profilePath}
+      title={displayName}
+      aria-label={`Open ${displayName} profile`}
+      className="shrink-0 mt-1 rounded-full hover:scale-105 transition-transform"
+    >
+      {avatar}
+    </Link>
+  );
+}
+
 export function ChatView({ messages, currentAccountId, isClosed, loading, onSend, onBack, title, subtitle }: ChatViewProps) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -57,7 +129,7 @@ export function ChatView({ messages, currentAccountId, isClosed, loading, onSend
           <h2 className="text-sm font-semibold text-mesh-text truncate">{title}</h2>
           {subtitle && <p className="text-xs text-mesh-muted truncate">{subtitle}</p>}
         </div>
-        {isClosed && <Badge variant="default">Closed</Badge>}
+        {isClosed && <Badge variant="default">{t('messages.closed')}</Badge>}
       </div>
 
       {/* Messages */}
@@ -65,12 +137,19 @@ export function ChatView({ messages, currentAccountId, isClosed, loading, onSend
         {loading ? (
           <div className="flex justify-center py-8"><Spinner size={24} /></div>
         ) : messages.length === 0 ? (
-          <p className="text-center text-mesh-muted text-sm py-8">No messages yet. Start the conversation.</p>
+          <p className="text-center text-mesh-muted text-sm py-8">{t('messages.emptyConversation')}</p>
         ) : (
           messages.map((msg) => {
             const isMe = msg.senderAccountId === currentAccountId;
+            const senderName = getSenderDisplayName(msg.senderAccount);
             return (
-              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+              <div key={msg.id} className={`flex gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                {!isMe && (
+                  <SenderAvatar
+                    sender={msg.senderAccount}
+                    accountId={msg.senderAccountId}
+                  />
+                )}
                 <div className={`max-w-[75%] px-3.5 py-2.5 rounded-mesh-sm ${
                   isMe
                     ? 'bg-mesh-gold/15 border border-mesh-gold/20'
@@ -78,7 +157,7 @@ export function ChatView({ messages, currentAccountId, isClosed, loading, onSend
                 }`}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-[11px] font-medium text-mesh-muted">
-                      {isMe ? 'You' : (msg.senderAccount?.email?.split('@')[0] ?? 'Other')}
+                      {isMe ? t('messages.you') : senderName}
                     </span>
                     {msg.senderAccount?.role && (
                       <Badge variant={msg.senderAccount.role === 'ADMIN' ? 'gold' : msg.senderAccount.role === 'VENDOR' ? 'info' : 'default'} className="text-[9px]">
@@ -105,7 +184,7 @@ export function ChatView({ messages, currentAccountId, isClosed, loading, onSend
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type a message..."
+              placeholder={t('messages.typeMessage')}
               className="w-full px-3 py-2.5 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-text placeholder:text-mesh-muted/60 focus:outline-none focus:border-mesh-gold/50"
               disabled={sending}
             />
@@ -120,7 +199,7 @@ export function ChatView({ messages, currentAccountId, isClosed, loading, onSend
         </form>
       ) : (
         <div className="pt-3 border-t border-mesh-border/30 text-center text-sm text-mesh-muted">
-          This conversation is closed.
+          {t('messages.conversationClosed')}
         </div>
       )}
     </div>

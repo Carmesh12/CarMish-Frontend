@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle, MessageSquare, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { Card } from '../../../components/ui/Card';
@@ -16,6 +17,7 @@ import {
 } from '../api';
 
 export function VendorRequestsPage() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<'pending' | 'all'>('pending');
   const [pendingData, setPendingData] = useState<Paginated<PendingVendor> | null>(null);
   const [allData, setAllData] = useState<Paginated<VendorListItem> | null>(null);
@@ -55,9 +57,9 @@ export function VendorRequestsPage() {
     setActionLoading(true);
     try {
       await approveVendor(vendorId);
-      toast.success('Vendor approved');
+      toast.success(t('adminVendors.vendorApproved'));
       setPendingData((prev) => prev ? { ...prev, data: prev.data.filter((v) => v.id !== vendorId) } : prev);
-    } catch { toast.error('Failed to approve vendor'); }
+    } catch { toast.error(t('adminVendors.approveError')); }
     finally { setActionLoading(false); }
   };
 
@@ -66,11 +68,11 @@ export function VendorRequestsPage() {
     setActionLoading(true);
     try {
       await rejectVendor(rejectModal.vendorId, rejectReason || undefined);
-      toast.success('Vendor rejected');
+      toast.success(t('adminVendors.vendorRejected'));
       setPendingData((prev) => prev ? { ...prev, data: prev.data.filter((v) => v.id !== rejectModal.vendorId) } : prev);
       setRejectModal(null);
       setRejectReason('');
-    } catch { toast.error('Failed to reject vendor'); }
+    } catch { toast.error(t('adminVendors.rejectError')); }
     finally { setActionLoading(false); }
   };
 
@@ -79,25 +81,25 @@ export function VendorRequestsPage() {
     setActionLoading(true);
     try {
       await messageVendor(msgModal.vendorId, msgSubject.trim(), msgBody.trim());
-      toast.success('Message sent');
+      toast.success(t('adminVendors.messageSent'));
       setMsgModal(null);
       setMsgSubject('');
       setMsgBody('');
-    } catch { toast.error('Failed to send message'); }
+    } catch { toast.error(t('adminVendors.messageError')); }
     finally { setActionLoading(false); }
   };
 
   return (
     <div className="space-y-6 pb-8">
-      <h1 className="text-2xl font-bold text-mesh-text">Vendor Requests</h1>
+      <h1 className="text-2xl font-bold text-mesh-text">{t('adminVendors.title')}</h1>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-mesh-surface/40 rounded-mesh-sm p-1 w-fit">
         <button onClick={() => setTab('pending')} className={`px-4 py-1.5 text-sm font-medium rounded-mesh-sm transition-colors ${tab === 'pending' ? 'bg-mesh-gold text-black' : 'text-mesh-muted hover:text-mesh-text'}`}>
-          Pending
+          {t('adminVendors.pendingTab')}
         </button>
         <button onClick={() => setTab('all')} className={`px-4 py-1.5 text-sm font-medium rounded-mesh-sm transition-colors ${tab === 'all' ? 'bg-mesh-gold text-black' : 'text-mesh-muted hover:text-mesh-text'}`}>
-          All Vendors
+          {t('adminVendors.allTab')}
         </button>
       </div>
 
@@ -108,7 +110,7 @@ export function VendorRequestsPage() {
             <input
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              placeholder="Search vendors..."
+              placeholder={t('adminVendors.searchPlaceholder')}
               className="pl-9 pr-3 py-2 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-text placeholder:text-mesh-muted/60 focus:outline-none focus:border-mesh-gold/50 w-64"
             />
           </div>
@@ -117,10 +119,10 @@ export function VendorRequestsPage() {
             onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
             className="px-3 py-2 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-text focus:outline-none focus:border-mesh-gold/50"
           >
-            <option value="">All Statuses</option>
-            <option value="PENDING">Pending</option>
-            <option value="APPROVED">Approved</option>
-            <option value="REJECTED">Rejected</option>
+            <option value="">{t('adminVendors.allStatuses')}</option>
+            <option value="PENDING">{t('adminVendors.pending')}</option>
+            <option value="APPROVED">{t('adminVendors.approved')}</option>
+            <option value="REJECTED">{t('adminVendors.rejected')}</option>
           </select>
         </div>
       )}
@@ -130,18 +132,18 @@ export function VendorRequestsPage() {
       ) : tab === 'pending' ? (
         <div className="space-y-4">
           {(!pendingData || pendingData.data.length === 0) ? (
-            <Card padding><p className="text-mesh-muted text-sm text-center py-4">No pending vendor applications.</p></Card>
+            <Card padding><p className="text-mesh-muted text-sm text-center py-4">{t('adminVendors.emptyPending')}</p></Card>
           ) : (
             pendingData.data.map((vendor) => (
               <Card key={vendor.id} padding>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="space-y-1">
                     <h3 className="text-base font-semibold text-mesh-text">{vendor.businessName}</h3>
-                    <p className="text-sm text-mesh-muted">Contact: {vendor.contactPersonName}</p>
+                    <p className="text-sm text-mesh-muted">{t('adminVendors.contact')}: {vendor.contactPersonName}</p>
                     <p className="text-sm text-mesh-muted">{vendor.account.email}</p>
-                    {vendor.phoneNumber && <p className="text-xs text-mesh-muted">Phone: {vendor.phoneNumber}</p>}
-                    {vendor.businessAddress && <p className="text-xs text-mesh-muted">Address: {vendor.businessAddress}</p>}
-                    <p className="text-xs text-mesh-muted">Registered: {new Date(vendor.createdAt).toLocaleDateString()}</p>
+                    {vendor.phoneNumber && <p className="text-xs text-mesh-muted">{t('adminVendors.phone')}: {vendor.phoneNumber}</p>}
+                    {vendor.businessAddress && <p className="text-xs text-mesh-muted">{t('adminVendors.address')}: {vendor.businessAddress}</p>}
+                    <p className="text-xs text-mesh-muted">{t('adminVendors.registered')}: {new Date(vendor.createdAt).toLocaleDateString()}</p>
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button
@@ -149,21 +151,21 @@ export function VendorRequestsPage() {
                       disabled={actionLoading}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-emerald-600/20 text-emerald-400 border border-emerald-600/30 rounded-mesh-sm hover:bg-emerald-600/30 transition-colors disabled:opacity-40"
                     >
-                      <CheckCircle size={14} /> Approve
+                      <CheckCircle size={14} /> {t('adminVendors.approve')}
                     </button>
                     <button
                       onClick={() => setRejectModal({ vendorId: vendor.id, name: vendor.businessName })}
                       disabled={actionLoading}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-red-600/20 text-red-400 border border-red-600/30 rounded-mesh-sm hover:bg-red-600/30 transition-colors disabled:opacity-40"
                     >
-                      <XCircle size={14} /> Reject
+                      <XCircle size={14} /> {t('adminVendors.reject')}
                     </button>
                     <button
                       onClick={() => setMsgModal({ vendorId: vendor.id, name: vendor.businessName })}
                       disabled={actionLoading}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-mesh-sm hover:bg-blue-600/30 transition-colors disabled:opacity-40"
                     >
-                      <MessageSquare size={14} /> Message
+                      <MessageSquare size={14} /> {t('adminVendors.message')}
                     </button>
                   </div>
                 </div>
@@ -177,17 +179,17 @@ export function VendorRequestsPage() {
       ) : (
         <div className="space-y-4">
           {(!allData || allData.data.length === 0) ? (
-            <Card padding><p className="text-mesh-muted text-sm text-center py-4">No vendors found.</p></Card>
+            <Card padding><p className="text-mesh-muted text-sm text-center py-4">{t('adminVendors.emptyAll')}</p></Card>
           ) : (
             <Card padding>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead><tr className="text-mesh-muted text-xs border-b border-mesh-border">
-                    <th className="text-left pb-2">Business</th>
-                    <th className="text-left pb-2">Contact</th>
-                    <th className="text-left pb-2">Status</th>
-                    <th className="text-right pb-2">Vehicles</th>
-                    <th className="text-right pb-2">Registered</th>
+                    <th className="text-left rtl:text-right pb-2">{t('adminVendors.business')}</th>
+                    <th className="text-left rtl:text-right pb-2">{t('adminVendors.contact')}</th>
+                    <th className="text-left rtl:text-right pb-2">{t('adminVendors.status')}</th>
+                    <th className="text-right rtl:text-left pb-2">{t('adminVendors.vehicles')}</th>
+                    <th className="text-right rtl:text-left pb-2">{t('adminVendors.registered')}</th>
                   </tr></thead>
                   <tbody>
                     {allData.data.map((v) => (
@@ -217,19 +219,19 @@ export function VendorRequestsPage() {
       {/* Reject Modal */}
       {rejectModal && (
         <ModalOverlay onClose={() => setRejectModal(null)}>
-          <h3 className="text-lg font-semibold text-mesh-text mb-2">Reject {rejectModal.name}</h3>
-          <p className="text-sm text-mesh-muted mb-4">Optionally provide a reason for rejection:</p>
+          <h3 className="text-lg font-semibold text-mesh-text mb-2">{t('adminVendors.rejectTitle', { name: rejectModal.name })}</h3>
+          <p className="text-sm text-mesh-muted mb-4">{t('adminVendors.rejectHint')}</p>
           <textarea
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
             rows={3}
             className="w-full px-3 py-2 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-text placeholder:text-mesh-muted/60 focus:outline-none focus:border-mesh-gold/50 mb-4"
-            placeholder="Reason (optional)"
+            placeholder={t('adminVendors.rejectReasonPlaceholder')}
           />
           <div className="flex justify-end gap-2">
-            <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm text-mesh-muted hover:text-mesh-text transition-colors">Cancel</button>
+            <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm text-mesh-muted hover:text-mesh-text transition-colors">{t('common.cancel')}</button>
             <button onClick={handleReject} disabled={actionLoading} className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-mesh-sm hover:bg-red-700 disabled:opacity-40 transition-colors">
-              Reject
+              {t('adminVendors.reject')}
             </button>
           </div>
         </ModalOverlay>
@@ -238,24 +240,24 @@ export function VendorRequestsPage() {
       {/* Message Modal */}
       {msgModal && (
         <ModalOverlay onClose={() => setMsgModal(null)}>
-          <h3 className="text-lg font-semibold text-mesh-text mb-4">Message {msgModal.name}</h3>
+          <h3 className="text-lg font-semibold text-mesh-text mb-4">{t('adminVendors.messageTitle', { name: msgModal.name })}</h3>
           <input
             value={msgSubject}
             onChange={(e) => setMsgSubject(e.target.value)}
             className="w-full px-3 py-2 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-text placeholder:text-mesh-muted/60 focus:outline-none focus:border-mesh-gold/50 mb-3"
-            placeholder="Subject"
+            placeholder={t('adminVendors.subject')}
           />
           <textarea
             value={msgBody}
             onChange={(e) => setMsgBody(e.target.value)}
             rows={4}
             className="w-full px-3 py-2 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-text placeholder:text-mesh-muted/60 focus:outline-none focus:border-mesh-gold/50 mb-4"
-            placeholder="Your message..."
+            placeholder={t('adminVendors.messagePlaceholder')}
           />
           <div className="flex justify-end gap-2">
-            <button onClick={() => setMsgModal(null)} className="px-4 py-2 text-sm text-mesh-muted hover:text-mesh-text transition-colors">Cancel</button>
+            <button onClick={() => setMsgModal(null)} className="px-4 py-2 text-sm text-mesh-muted hover:text-mesh-text transition-colors">{t('common.cancel')}</button>
             <button onClick={handleMessage} disabled={actionLoading || !msgSubject.trim() || !msgBody.trim()} className="px-4 py-2 text-sm font-medium bg-mesh-gold text-black rounded-mesh-sm hover:bg-mesh-gold/80 disabled:opacity-40 transition-colors">
-              Send Message
+              {t('adminVendors.sendMessage')}
             </button>
           </div>
         </ModalOverlay>
@@ -275,11 +277,13 @@ function ModalOverlay({ children, onClose }: { children: React.ReactNode; onClos
 }
 
 function PaginationControls({ page, totalPages, onPageChange }: { page: number; totalPages: number; onPageChange: (p: number) => void }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex items-center justify-center gap-2 pt-2">
-      <button onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-muted hover:text-mesh-text disabled:opacity-30 transition-colors">Prev</button>
+      <button onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1} className="px-3 py-1 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-muted hover:text-mesh-text disabled:opacity-30 transition-colors">{t('common.back')}</button>
       <span className="text-sm text-mesh-muted">{page} / {totalPages}</span>
-      <button onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page >= totalPages} className="px-3 py-1 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-muted hover:text-mesh-text disabled:opacity-30 transition-colors">Next</button>
+      <button onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={page >= totalPages} className="px-3 py-1 text-sm bg-mesh-surface/40 border border-mesh-border/30 rounded-mesh-sm text-mesh-muted hover:text-mesh-text disabled:opacity-30 transition-colors">{t('common.next')}</button>
     </div>
   );
 }

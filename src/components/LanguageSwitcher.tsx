@@ -3,13 +3,14 @@ import { Globe } from 'lucide-react';
 
 export function LanguageSwitcher({ compact }: { compact?: boolean }) {
   const { i18n } = useTranslation();
-  const isAr = i18n.language === 'ar';
+  const isAr = i18n.resolvedLanguage?.startsWith('ar') ?? i18n.language.startsWith('ar');
 
   const toggle = () => {
     const next = isAr ? 'en' : 'ar';
-    i18n.changeLanguage(next);
+    void i18n.changeLanguage(next);
     document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = next;
+    document.documentElement.classList.toggle('lang-ar', next === 'ar');
   };
 
   if (compact) {

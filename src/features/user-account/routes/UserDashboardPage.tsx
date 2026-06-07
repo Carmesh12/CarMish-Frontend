@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, User, Heart, ShoppingCart, CalendarDays, Box } from 'lucide-react';
+import { LayoutDashboard, User, Heart, ShoppingCart, CalendarDays, Box, Printer } from 'lucide-react';
 import { getUserDashboard } from '../api/userProfileApi';
 import type { UserDashboardResponse } from '../types';
 import { resolveMediaUrl } from '../../../lib/api';
@@ -10,6 +10,7 @@ import { Card } from '../../../components/ui/Card';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
+import { notifyError, notifySuccess } from '../../../lib/toast';
 
 const ACTION_ICONS: Record<string, React.ReactNode> = {
   editProfile: <User size={16} />,
@@ -29,6 +30,7 @@ export function UserDashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [personal3d, setPersonal3d] = useState<Personal3dModelSummary[] | null>(null);
+  const [printRequestingId, setPrintRequestingId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +70,22 @@ export function UserDashboardPage() {
 
   if (!data) return null;
 
+  async function requestPrint(model: Personal3dModelSummary) {
+    if (printRequestingId) return;
+    setPrintRequestingId(model.id);
+    try {
+      await vehicle3dApi.createPrintRequest({
+        personalVehicle3DModelId: model.id,
+        title: model.title ?? undefined,
+      });
+      notifySuccess(t('printRequests.requestSuccess'));
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : t('printRequests.requestError'));
+    } finally {
+      setPrintRequestingId(null);
+    }
+  }
+
   const avatarUrl = resolveMediaUrl(data.greeting.profileImageUrl);
 
   return (
@@ -96,7 +114,9 @@ export function UserDashboardPage() {
           </div>
           <div className="sm:ms-auto">
             <Badge variant={data.accountSummary.isActive ? 'success' : 'danger'}>
-              {data.accountSummary.isActive ? t('common.status') + ': Active' : t('common.status') + ': Inactive'}
+              {data.accountSummary.isActive
+                ? `${t('common.status')}: ${t('common.active')}`
+                : `${t('common.status')}: ${t('common.inactive')}`}
             </Badge>
           </div>
         </div>
@@ -188,9 +208,20 @@ export function UserDashboardPage() {
                 <span className="text-mesh-muted text-xs">
                   {new Date(m.generatedAt).toLocaleDateString()}
                 </span>
-                <Link to={`/local-3d?src=${encodeURIComponent(m.modelUrl)}`}>
-                  <Button variant="ghost" size="sm">{t('threeD.openPreview', 'Open preview')}</Button>
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Link to={`/local-3d?src=${encodeURIComponent(m.modelUrl)}`}>
+                    <Button variant="ghost" size="sm">{t('threeD.openPreview', 'Open preview')}</Button>
+                  </Link>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    loading={printRequestingId === m.id}
+                    onClick={() => requestPrint(m)}
+                  >
+                    <Printer size={14} />
+                    {t('printRequests.requestButton')}
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

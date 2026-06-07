@@ -6,11 +6,23 @@ export type UserProfileResponse = {
   firstName: string;
   lastName: string;
   phoneNumber: string | null;
+  city: string | null;
+  address: string | null;
   profileImageUrl: string | null;
   accountCreatedAt: string;
   accountUpdatedAt: string;
   profileCreatedAt: string;
   profileUpdatedAt: string;
+};
+
+export type PublicUserProfileResponse = {
+  accountId: string;
+  firstName: string;
+  lastName: string;
+  city: string | null;
+  profileImageUrl: string | null;
+  memberSince: string;
+  profileCreatedAt: string;
 };
 
 export type ProfileCompletion = {

@@ -5,10 +5,15 @@ import type {
   VendorDashboardResponse,
   VendorAnalyticsChatResponse,
   VendorProfileResponse,
+  PublicVendorProfileResponse,
 } from '../types';
 
 export function getVendorProfile() {
   return authJson<VendorProfileResponse>('/vendor/profile');
+}
+
+export function getPublicVendorProfile(accountId: string) {
+  return authJson<PublicVendorProfileResponse>(`/vendors/${accountId}`);
 }
 
 export function getVendorDashboard(range: VendorDashboardRange = 'month') {

@@ -1,5 +1,28 @@
 import { authJson } from '../../lib/api';
 
+type ReadableMessage = {
+  senderAccountId: string;
+  isRead: boolean;
+};
+
+export type MessageSenderAccount = {
+  email: string;
+  role: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    profileImageUrl: string | null;
+  } | null;
+  vendor?: {
+    businessName: string;
+    logoUrl: string | null;
+  } | null;
+  admin?: {
+    firstName: string;
+    lastName: string;
+  } | null;
+};
+
 export type ThreadMessage = {
   id: string;
   threadId: string;
@@ -7,7 +30,7 @@ export type ThreadMessage = {
   body: string;
   isRead: boolean;
   createdAt: string;
-  senderAccount?: { email: string; role: string };
+  senderAccount?: MessageSenderAccount;
 };
 
 export type AdminThread = {
@@ -21,7 +44,12 @@ export type AdminThread = {
   createdAt: string;
   updatedAt: string;
   messages: ThreadMessage[];
-  vendorAccount?: { email: string; vendor?: { businessName: string } | null };
+  vendorAccount?: {
+    email: string;
+    role?: string;
+    user?: { firstName: string; lastName: string } | null;
+    vendor?: { businessName: string } | null;
+  };
   adminAccount?: { email: string; admin?: { firstName: string; lastName: string } | null };
 };
 
@@ -32,7 +60,7 @@ export type ConversationMessage = {
   body: string;
   isRead: boolean;
   createdAt: string;
-  senderAccount?: { email: string; role: string };
+  senderAccount?: MessageSenderAccount;
 };
 
 export type Conversation = {
@@ -55,6 +83,44 @@ export type Paginated<T> = {
   data: T[];
   meta: { total: number; page: number; limit: number; totalPages: number };
 };
+
+export function getAccountIdFromAccessToken(): string | null {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return null;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1])) as { sub?: string };
+    return typeof payload.sub === 'string' ? payload.sub : null;
+  } catch {
+    return null;
+  }
+}
+
+export function countUnreadFromOthers(
+  messages: ReadableMessage[],
+  currentAccountId: string,
+): number {
+  return messages.filter((message) => (
+    !message.isRead &&
+    (!currentAccountId || message.senderAccountId !== currentAccountId)
+  )).length;
+}
+
+export function markMessagesFromOthersRead<
+  TMessage extends ReadableMessage,
+  TItem extends { messages: TMessage[] },
+>(item: TItem, currentAccountId: string): TItem {
+  if (!currentAccountId) return item;
+
+  return {
+    ...item,
+    messages: item.messages.map((message) => (
+      !message.isRead && message.senderAccountId !== currentAccountId
+        ? { ...message, isRead: true }
+        : message
+    )),
+  };
+}
 
 export function getMyAdminThreads(page = 1, limit = 20) {
   return authJson<Paginated<AdminThread>>(`/admin/messaging/threads?page=${page}&limit=${limit}`);

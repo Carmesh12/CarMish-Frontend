@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
 import { Card } from '../../../components/ui/Card';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Badge } from '../../../components/ui/Badge';
 import { useAuthStore } from '../../../stores/authStore';
+import { useNotificationStore } from '../../../stores/notificationStore';
 import {
+  countUnreadFromOthers,
+  getAccountIdFromAccessToken,
   getMyAdminThreads,
   getAdminThread,
   replyToAdminThread,
   getMyConversations,
   getConversation,
+  markMessagesFromOthersRead,
   sendConversationMessage,
   type AdminThread,
   type Conversation,
@@ -18,7 +23,9 @@ import {
 import { ChatView } from './ChatView';
 
 export function VendorMessagesPage() {
-  const accountId = useAuthStore((s) => s.user?.id) ?? '';
+  const { t } = useTranslation();
+  const accountId = useAuthStore((s) => s.user?.id) ?? getAccountIdFromAccessToken() ?? '';
+  const fetchNotifications = useNotificationStore((s) => s.fetch);
   const [tab, setTab] = useState<'customers' | 'admin'>('customers');
 
   const [adminThreads, setAdminThreads] = useState<Paginated<AdminThread> | null>(null);
@@ -48,7 +55,16 @@ export function VendorMessagesPage() {
     setChatLoading(true);
     try {
       const thread = await getAdminThread(threadId);
-      setActiveThread(thread);
+      setActiveThread(markMessagesFromOthersRead(thread, accountId));
+      setAdminThreads((current) => current
+        ? {
+            ...current,
+            data: current.data.map((item) => (
+              item.id === threadId ? markMessagesFromOthersRead(item, accountId) : item
+            )),
+          }
+        : current);
+      void fetchNotifications();
     } catch { /* silently fail */ }
     finally { setChatLoading(false); }
   };
@@ -57,7 +73,16 @@ export function VendorMessagesPage() {
     setChatLoading(true);
     try {
       const convo = await getConversation(convoId);
-      setActiveConvo(convo);
+      setActiveConvo(markMessagesFromOthersRead(convo, accountId));
+      setConversations((current) => current
+        ? {
+            ...current,
+            data: current.data.map((item) => (
+              item.id === convoId ? markMessagesFromOthersRead(item, accountId) : item
+            )),
+          }
+        : current);
+      void fetchNotifications();
     } catch { /* silently fail */ }
     finally { setChatLoading(false); }
   };
@@ -66,20 +91,20 @@ export function VendorMessagesPage() {
     if (!activeThread) return;
     await replyToAdminThread(activeThread.id, body);
     const updated = await getAdminThread(activeThread.id);
-    setActiveThread(updated);
+    setActiveThread(markMessagesFromOthersRead(updated, accountId));
   };
 
   const handleConvoReply = async (body: string) => {
     if (!activeConvo) return;
     await sendConversationMessage(activeConvo.id, body);
     const updated = await getConversation(activeConvo.id);
-    setActiveConvo(updated);
+    setActiveConvo(markMessagesFromOthersRead(updated, accountId));
   };
 
   if (activeThread) {
     const adminName = activeThread.adminAccount?.admin
       ? `${activeThread.adminAccount.admin.firstName} ${activeThread.adminAccount.admin.lastName}`
-      : (activeThread.adminAccount?.email ?? 'Admin');
+      : (activeThread.adminAccount?.email ?? t('messages.admin'));
     return (
       <div className="space-y-4">
         <ChatView
@@ -90,7 +115,7 @@ export function VendorMessagesPage() {
           onSend={handleAdminReply}
           onBack={() => setActiveThread(null)}
           title={activeThread.subject}
-          subtitle={`Admin: ${adminName}`}
+          subtitle={`${t('messages.admin')}: ${adminName}`}
         />
       </div>
     );
@@ -99,9 +124,9 @@ export function VendorMessagesPage() {
   if (activeConvo) {
     const userName = activeConvo.userAccount?.user
       ? `${activeConvo.userAccount.user.firstName} ${activeConvo.userAccount.user.lastName}`
-      : (activeConvo.userAccount?.email ?? 'Customer');
+      : (activeConvo.userAccount?.email ?? t('messages.customer'));
     const vehicleLabel = activeConvo.vehicle ? `${activeConvo.vehicle.title}` : '';
-    const ctxLabel = activeConvo.context === 'GENERAL' ? 'General inquiry' : activeConvo.context.replace('_', ' ').toLowerCase();
+    const ctxLabel = activeConvo.context === 'GENERAL' ? t('messages.generalInquiry') : activeConvo.context.replace('_', ' ').toLowerCase();
     return (
       <div className="space-y-4">
         <ChatView
@@ -122,15 +147,15 @@ export function VendorMessagesPage() {
     <div className="space-y-6 pb-8">
       <div className="flex items-center gap-3">
         <MessageSquare size={22} className="text-mesh-gold" />
-        <h1 className="text-2xl font-bold text-mesh-text">Messages</h1>
+        <h1 className="text-2xl font-bold text-mesh-text">{t('messages.messages')}</h1>
       </div>
 
       <div className="flex gap-1 bg-mesh-surface/40 rounded-mesh-sm p-1 w-fit">
         <button onClick={() => { setTab('customers'); }} className={`px-4 py-1.5 text-sm font-medium rounded-mesh-sm transition-colors ${tab === 'customers' ? 'bg-mesh-gold text-black' : 'text-mesh-muted hover:text-mesh-text'}`}>
-          Customer Messages
+          {t('messages.customerMessages')}
         </button>
         <button onClick={() => { setTab('admin'); }} className={`px-4 py-1.5 text-sm font-medium rounded-mesh-sm transition-colors ${tab === 'admin' ? 'bg-mesh-gold text-black' : 'text-mesh-muted hover:text-mesh-text'}`}>
-          Admin Messages
+          {t('messages.adminMessages')}
         </button>
       </div>
 
@@ -140,27 +165,32 @@ export function VendorMessagesPage() {
         <ThreadList
           threads={adminThreads?.data ?? []}
           onOpen={openThread}
-          emptyText="No messages from admin."
+          emptyText={t('messages.noAdminMessages')}
           type="admin"
+          currentAccountId={accountId}
         />
       ) : (
         <ConversationList
           conversations={conversations?.data ?? []}
           onOpen={openConversation}
-          emptyText="No customer messages yet."
+          emptyText={t('messages.noCustomerMessages')}
           viewAs="vendor"
+          currentAccountId={accountId}
         />
       )}
     </div>
   );
 }
 
-function ThreadList({ threads, onOpen, emptyText, type }: {
+function ThreadList({ threads, onOpen, emptyText, type, currentAccountId }: {
   threads: AdminThread[];
   onOpen: (id: string) => void;
   emptyText: string;
   type: 'admin' | 'vendor';
+  currentAccountId: string;
 }) {
+  const { t } = useTranslation();
+
   if (threads.length === 0) {
     return <Card padding><p className="text-mesh-muted text-sm text-center py-6">{emptyText}</p></Card>;
   }
@@ -169,10 +199,21 @@ function ThreadList({ threads, onOpen, emptyText, type }: {
     <div className="space-y-2">
       {threads.map((thread) => {
         const lastMsg = thread.messages[0];
-        const unread = thread.messages.filter((m) => !m.isRead).length;
+        const unread = countUnreadFromOthers(thread.messages, currentAccountId);
         const otherParty = type === 'admin'
-          ? (thread.vendorAccount?.vendor?.businessName ?? thread.vendorAccount?.email ?? 'Vendor')
-          : (thread.adminAccount?.email ?? 'Admin');
+          ? (thread.adminAccount?.admin
+              ? `${thread.adminAccount.admin.firstName} ${thread.adminAccount.admin.lastName}`
+              : thread.adminAccount?.email ?? t('messages.admin'))
+          : (thread.vendorAccount?.vendor?.businessName
+              ?? (thread.vendorAccount?.user
+                ? `${thread.vendorAccount.user.firstName} ${thread.vendorAccount.user.lastName}`
+                : thread.vendorAccount?.email)
+              ?? t('messages.requester'));
+        const contextLabel = thread.context === 'THREE_D_PRINT_REQUEST'
+          ? t('messages.threeDPrint')
+          : thread.context === 'VENDOR_VERIFICATION'
+            ? t('messages.verification')
+            : t('messages.report');
 
         return (
           <button key={thread.id} onClick={() => onOpen(thread.id)} className="w-full text-left">
@@ -181,9 +222,9 @@ function ThreadList({ threads, onOpen, emptyText, type }: {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-mesh-text truncate">{thread.subject}</span>
-                    {thread.isClosed && <Badge variant="default" className="text-[10px]">Closed</Badge>}
-                    <Badge variant={thread.context === 'VENDOR_VERIFICATION' ? 'info' : 'warning'} className="text-[10px]">
-                      {thread.context === 'VENDOR_VERIFICATION' ? 'Verification' : 'Report'}
+                    {thread.isClosed && <Badge variant="default" className="text-[10px]">{t('messages.closed')}</Badge>}
+                    <Badge variant={thread.context === 'THREE_D_PRINT_REQUEST' ? 'gold' : thread.context === 'VENDOR_VERIFICATION' ? 'info' : 'warning'} className="text-[10px]">
+                      {contextLabel}
                     </Badge>
                   </div>
                   <p className="text-xs text-mesh-muted mt-0.5">{otherParty}</p>
@@ -208,12 +249,15 @@ function ThreadList({ threads, onOpen, emptyText, type }: {
   );
 }
 
-function ConversationList({ conversations, onOpen, emptyText, viewAs }: {
+function ConversationList({ conversations, onOpen, emptyText, viewAs, currentAccountId }: {
   conversations: Conversation[];
   onOpen: (id: string) => void;
   emptyText: string;
   viewAs: 'user' | 'vendor';
+  currentAccountId: string;
 }) {
+  const { t } = useTranslation();
+
   if (conversations.length === 0) {
     return <Card padding><p className="text-mesh-muted text-sm text-center py-6">{emptyText}</p></Card>;
   }
@@ -222,11 +266,11 @@ function ConversationList({ conversations, onOpen, emptyText, viewAs }: {
     <div className="space-y-2">
       {conversations.map((convo) => {
         const lastMsg = convo.messages[0];
-        const unread = convo.messages.filter((m) => !m.isRead).length;
+        const unread = countUnreadFromOthers(convo.messages, currentAccountId);
         const otherParty = viewAs === 'vendor'
-          ? (convo.userAccount?.user ? `${convo.userAccount.user.firstName} ${convo.userAccount.user.lastName}` : convo.userAccount?.email ?? 'Customer')
-          : (convo.vendorAccount?.vendor?.businessName ?? convo.vendorAccount?.email ?? 'Vendor');
-        const ctxLabel = convo.context === 'GENERAL' ? 'General' : convo.context === 'PURCHASE_REQUEST' ? 'Purchase' : 'Rental';
+          ? (convo.userAccount?.user ? `${convo.userAccount.user.firstName} ${convo.userAccount.user.lastName}` : convo.userAccount?.email ?? t('messages.customer'))
+          : (convo.vendorAccount?.vendor?.businessName ?? convo.vendorAccount?.email ?? t('messages.vendor'));
+        const ctxLabel = convo.context === 'GENERAL' ? t('messages.general') : convo.context === 'PURCHASE_REQUEST' ? t('messages.purchase') : t('messages.rental');
 
         return (
           <button key={convo.id} onClick={() => onOpen(convo.id)} className="w-full text-left">
@@ -238,7 +282,7 @@ function ConversationList({ conversations, onOpen, emptyText, viewAs }: {
                     <Badge variant={convo.context === 'GENERAL' ? 'info' : convo.context === 'PURCHASE_REQUEST' ? 'gold' : 'warning'} className="text-[10px]">
                       {ctxLabel}
                     </Badge>
-                    {convo.isClosed && <Badge variant="default" className="text-[10px]">Closed</Badge>}
+                    {convo.isClosed && <Badge variant="default" className="text-[10px]">{t('messages.closed')}</Badge>}
                   </div>
                   {convo.vehicle && <p className="text-xs text-mesh-muted mt-0.5">{convo.vehicle.title} ({convo.vehicle.brand})</p>}
                   {lastMsg && <p className="text-xs text-mesh-muted/70 mt-1 truncate">{lastMsg.body.slice(0, 100)}</p>}

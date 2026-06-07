@@ -3,14 +3,16 @@ import { useTranslation } from 'react-i18next';
 
 export function AppToastContainer() {
   const { i18n } = useTranslation();
+  const isArabic = i18n.resolvedLanguage?.startsWith('ar') ?? i18n.language.startsWith('ar');
+
   return (
     <ToastContainer
-      position={i18n.language === 'ar' ? 'top-left' : 'top-right'}
+      position={isArabic ? 'top-left' : 'top-right'}
       autoClose={4200}
       hideProgressBar={false}
       newestOnTop
       closeOnClick
-      rtl={i18n.language === 'ar'}
+      rtl={isArabic}
       pauseOnFocusLoss
       draggable
       pauseOnHover

@@ -39,7 +39,14 @@ function getNotificationPath(notification: Notification, role: string | null) {
     return role === 'ADMIN' ? '/admin/reports' : null;
   }
 
+  if (notification.relatedEntityType === 'THREE_D_PRINT_REQUEST') {
+    if (role === 'ADMIN') return '/admin/print-requests';
+    if (role === 'USER') return '/user/dashboard';
+    if (role === 'VENDOR') return '/vendor/dashboard';
+  }
+
   if (notification.relatedEntityType === 'OTHER') {
+    if (role === 'USER') return '/user/messages';
     if (role === 'VENDOR') return '/vendor/messages';
     if (role === 'ADMIN') return '/admin/messages';
   }

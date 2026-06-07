@@ -298,6 +298,19 @@ export function VehicleDetailPage() {
     value: r.value,
     label: t(`report.reason.${r.value}`, r.label),
   }));
+  const conditionLabel = vehicle.condition === "NEW"
+    ? t("vehicles.conditionNew")
+    : t("vehicles.conditionUsed");
+  const drivetrainLabel =
+    vehicle.drivetrain === "FOUR_WD"
+      ? t("vehicles.fourWd")
+      : t(`vehicles.${vehicle.drivetrain?.toLowerCase()}`, vehicle.drivetrain);
+  const bodyLabel = vehicle.bodyType
+    ? t(`vehicles.${vehicle.bodyType.toLowerCase()}`, vehicle.bodyType)
+    : "—";
+  const interiorLabel = vehicle.interiorMaterial
+    ? t(`vehicles.${vehicle.interiorMaterial.toLowerCase()}`, vehicle.interiorMaterial)
+    : "—";
 
   const specs = [
     {
@@ -316,18 +329,51 @@ export function VehicleDetailPage() {
       value: vehicle.model,
     },
     {
+      icon: <Cog size={18} />,
+      label: t("detail.trim"),
+      value: vehicle.trim ?? "—",
+    },
+    {
+      icon: <KeyRound size={18} />,
+      label: t("detail.condition"),
+      value: conditionLabel,
+    },
+    {
       icon: <Fuel size={18} />,
       label: t("detail.fuelType", "Fuel Type"),
       value: vehicle.fuelType
-        ? t(`fuel.${vehicle.fuelType}`, vehicle.fuelType)
+        ? t(`vehicles.${vehicle.fuelType.toLowerCase()}`, vehicle.fuelType)
         : "—",
     },
     {
       icon: <Cog size={18} />,
       label: t("detail.transmission", "Transmission"),
       value: vehicle.transmission
-        ? t(`transmission.${vehicle.transmission}`, vehicle.transmission)
+        ? t(
+            `vehicles.${vehicle.transmission === "SEMI_AUTOMATIC" ? "semiAutomatic" : vehicle.transmission.toLowerCase()}`,
+            vehicle.transmission,
+          )
         : "—",
+    },
+    {
+      icon: <Cog size={18} />,
+      label: t("detail.engine"),
+      value: `${vehicle.engineCapacity} / ${vehicle.horsepower} hp`,
+    },
+    {
+      icon: <Cog size={18} />,
+      label: t("detail.drivetrain"),
+      value: drivetrainLabel,
+    },
+    {
+      icon: <Gauge size={18} />,
+      label: "0-100 km/h",
+      value: vehicle.acceleration ? `${vehicle.acceleration}s` : "—",
+    },
+    {
+      icon: <Gauge size={18} />,
+      label: t("detail.topSpeed"),
+      value: vehicle.topSpeed ? `${vehicle.topSpeed} km/h` : "—",
     },
     {
       icon: <Gauge size={18} />,
@@ -343,9 +389,29 @@ export function VehicleDetailPage() {
       value: vehicle.color ?? "—",
     },
     {
+      icon: <Cog size={18} />,
+      label: t("detail.body"),
+      value: `${bodyLabel} / ${vehicle.doors} ${t("detail.doors")}`,
+    },
+    {
+      icon: <Cog size={18} />,
+      label: t("detail.interior"),
+      value: `${vehicle.seats} ${t("detail.seats")} / ${interiorLabel}`,
+    },
+    {
+      icon: <Fuel size={18} />,
+      label: t("detail.efficiency"),
+      value:
+        vehicle.fuelConsumption != null
+          ? `${vehicle.fuelConsumption} L/100km`
+          : "—",
+    },
+    {
       icon: <MapPin size={18} />,
       label: t("detail.city", "City"),
-      value: vehicle.locationCity ?? "—",
+      value: [vehicle.locationCity, vehicle.locationCountry]
+        .filter(Boolean)
+        .join(", "),
     },
   ];
 
@@ -597,7 +663,10 @@ export function VehicleDetailPage() {
               </div>
 
               {vehicle.vendor && (
-                <div className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-[var(--radius-mesh-sm)] border border-white/[0.06]">
+                <Link
+                  to={`/vendors/${vehicle.vendor.accountId}`}
+                  className="flex items-center gap-3 p-3 bg-white/[0.03] rounded-[var(--radius-mesh-sm)] border border-white/[0.06] hover:border-mesh-gold/30 hover:bg-white/[0.05] transition-all duration-200"
+                >
                   {vehicle.vendor.logoUrl ? (
                     <img
                       src={resolveMediaUrl(vehicle.vendor.logoUrl) ?? ""}
@@ -610,14 +679,14 @@ export function VehicleDetailPage() {
                     </div>
                   )}
                   <div>
-                    <p className="text-sm font-medium text-mesh-text">
+                    <p className="text-sm font-medium text-mesh-text hover:text-mesh-gold transition-colors">
                       {vehicle.vendor.businessName}
                     </p>
                     <p className="text-xs text-mesh-muted">
                       {vehicle.vendor.contactPersonName}
                     </p>
                   </div>
-                </div>
+                </Link>
               )}
             </Card>
 

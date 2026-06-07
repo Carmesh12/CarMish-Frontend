@@ -1,19 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Printer } from 'lucide-react';
 import { LocalModelViewer } from '../../3dgeneration';
 import { vehicle3dApi } from '../api/vehicle3dApi';
 import { Button } from '../../../components/ui/Button';
 import { Spinner } from '../../../components/ui/Spinner';
 import { Card } from '../../../components/ui/Card';
+import { Textarea } from '../../../components/ui/Textarea';
+import { notifyError, notifySuccess } from '../../../lib/toast';
+import { useAuthStore } from '../../../stores/authStore';
 
 export function VehiclePublic3dPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated, role } = useAuthStore();
+  const canRequestPrint = isAuthenticated && (role === 'USER' || role === 'VENDOR');
+  const [modelId, setModelId] = useState<string | null>(null);
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [printMessage, setPrintMessage] = useState('');
+  const [requestingPrint, setRequestingPrint] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -21,10 +29,13 @@ export function VehiclePublic3dPage() {
     vehicle3dApi
       .getPublicModelUrl(id)
       .then((r) => {
-        if (!cancelled) setModelUrl(r.modelUrl);
+        if (!cancelled) {
+          setModelId(r.modelId);
+          setModelUrl(r.modelUrl);
+        }
       })
       .catch((e: unknown) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load');
+        if (!cancelled) setError(e instanceof Error ? e.message : t('detail.fetchError'));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -32,7 +43,29 @@ export function VehiclePublic3dPage() {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, t]);
+
+  async function requestPrint() {
+    if (!modelId || requestingPrint) return;
+    if (!canRequestPrint) {
+      notifyError(t('printRequests.requestLoginError'));
+      return;
+    }
+
+    setRequestingPrint(true);
+    try {
+      await vehicle3dApi.createPrintRequest({
+        vehicle3DModelId: modelId,
+        message: printMessage.trim() || undefined,
+      });
+      setPrintMessage('');
+      notifySuccess(t('printRequests.requestSuccess'));
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : t('printRequests.requestError'));
+    } finally {
+      setRequestingPrint(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -81,6 +114,38 @@ export function VehiclePublic3dPage() {
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]">
         <LocalModelViewer src={modelUrl} />
       </div>
+      <Card>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-mesh-text flex items-center gap-2">
+              <Printer size={18} className="text-mesh-gold" />
+              {t('printRequests.requestTitle')}
+            </h2>
+            <p className="mt-1 text-sm text-mesh-muted">
+              {t('printRequests.requestDescription')}
+            </p>
+          </div>
+          {!isAuthenticated && (
+            <Link to="/login">
+              <Button variant="secondary" size="sm">{t('printRequests.loginToRequest')}</Button>
+            </Link>
+          )}
+        </div>
+        {canRequestPrint && (
+          <div className="mt-4 space-y-3">
+            <Textarea
+              label={t('printRequests.messageToAdmin')}
+              placeholder={t('printRequests.messagePlaceholder')}
+              value={printMessage}
+              onChange={(event) => setPrintMessage(event.target.value)}
+            />
+            <Button onClick={requestPrint} loading={requestingPrint}>
+              <Printer size={16} />
+              {t('printRequests.requestButton')}
+            </Button>
+          </div>
+        )}
+      </Card>
     </div>
   );
 }

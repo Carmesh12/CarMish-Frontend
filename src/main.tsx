@@ -12,8 +12,10 @@ useAuthStore.getState().hydrate();
 useThemeStore.getState().hydrate();
 
 const lang = localStorage.getItem('i18nextLng') || 'en';
-document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-document.documentElement.lang = lang;
+const isArabic = lang.toLowerCase().startsWith('ar');
+document.documentElement.dir = isArabic ? 'rtl' : 'ltr';
+document.documentElement.lang = isArabic ? 'ar' : 'en';
+document.documentElement.classList.toggle('lang-ar', isArabic);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

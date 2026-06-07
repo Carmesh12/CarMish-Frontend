@@ -40,7 +40,7 @@ export function SignupPage() {
   const onSubmitUser = async (data: SignupUserInput) => {
     setLoading(true);
     try {
-      const body = { ...data, phoneNumber: data.phoneNumber || undefined };
+      const body = { ...data, address: data.address || undefined };
       const res = await authApi.signupUser(body);
       setVerificationEmail(body.email);
       setSignupMessage(res.message);
@@ -170,11 +170,25 @@ export function SignupPage() {
                   {...userForm.register('lastName')}
                 />
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label={t('auth.phoneNumber')}
+                  type="tel"
+                  error={userForm.formState.errors.phoneNumber?.message ? t(userForm.formState.errors.phoneNumber.message) : undefined}
+                  {...userForm.register('phoneNumber')}
+                />
+                <Input
+                  label={t('profile.city', 'City')}
+                  placeholder={t('catalog.cityPlaceholder', 'e.g. Amman')}
+                  error={userForm.formState.errors.city?.message ? t(userForm.formState.errors.city.message) : undefined}
+                  {...userForm.register('city')}
+                />
+              </div>
               <Input
-                label={t('auth.phoneNumber')}
+                label={t('profile.address', 'Address')}
                 placeholder={`(${t('common.optional')})`}
-                error={userForm.formState.errors.phoneNumber?.message ? t(userForm.formState.errors.phoneNumber.message) : undefined}
-                {...userForm.register('phoneNumber')}
+                error={userForm.formState.errors.address?.message ? t(userForm.formState.errors.address.message) : undefined}
+                {...userForm.register('address')}
               />
               <Button type="submit" fullWidth loading={loading}>
                 <UserPlus size={16} />

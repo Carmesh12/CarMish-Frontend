@@ -1,4 +1,5 @@
 import { authJson } from '../../lib/api';
+import type { ThreeDPrintRequest, ThreeDPrintRequestListResponse } from '../vehicle-3d/api/vehicle3dApi';
 
 export type AdminDashboardRange = 'week' | 'month' | 'year' | 'all';
 
@@ -223,4 +224,21 @@ export function getThread(threadId: string) {
 
 export function replyToThread(threadId: string, body: string) {
   return authJson<ThreadMessage>(`/admin/messaging/threads/${threadId}/reply`, { method: 'POST', body: JSON.stringify({ body }) });
+}
+
+export function getAdminPrintRequests(page = 1, limit = 10, status?: string) {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (status) params.set('status', status);
+  return authJson<ThreeDPrintRequestListResponse>(`/admin/3d-print-requests?${params}`);
+}
+
+export function updatePrintRequestStatus(
+  requestId: string,
+  status: 'PENDING' | 'APPROVED' | 'REJECTED',
+  adminResponse?: string,
+) {
+  return authJson<ThreeDPrintRequest>(`/admin/3d-print-requests/${requestId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, adminResponse }),
+  });
 }

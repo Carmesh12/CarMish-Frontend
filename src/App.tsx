@@ -14,10 +14,12 @@ import { CatalogPage } from './features/vehicles/routes/CatalogPage';
 import { VehicleDetailPage } from './features/vehicles/routes/VehicleDetailPage';
 import { UserDashboardPage } from './features/user-account/routes/UserDashboardPage';
 import { UserProfilePage } from './features/user-account/routes/UserProfilePage';
+import { PublicUserPage } from './features/user-account/routes/PublicUserPage';
 import { FavoritesPage } from './features/favorites/routes/FavoritesPage';
 import { UserPurchasesPage } from './features/purchase-requests/routes/UserPurchasesPage';
 import { UserRentalsPage } from './features/rental-requests/routes/UserRentalsPage';
 import { ChatbotPage } from './features/chat/routes/ChatbotPage';
+import { PublicVendorPage } from './features/vendor-profile/routes/PublicVendorPage';
 import { VendorDashboardPage } from './features/vendor-profile/routes/VendorDashboardPage';
 import { VendorProfilePage } from './features/vendor-profile/routes/VendorProfilePage';
 import { VehicleManagementPage } from './features/vendor-profile/routes/VehicleManagementPage';
@@ -29,6 +31,7 @@ import { AdminProfilePage } from './features/admin-profile/routes/AdminProfilePa
 import { ReportsManagementPage } from './features/admin/routes/ReportsManagementPage';
 import { VendorRequestsPage } from './features/admin/routes/VendorRequestsPage';
 import { AccountsManagementPage } from './features/admin/routes/AccountsManagementPage';
+import { PrintRequestsPage } from './features/admin/routes/PrintRequestsPage';
 import { LocalModelPreviewPage } from './features/3dgeneration';
 import { VehiclePublic3dPage } from './features/vehicle-3d/routes/VehiclePublic3dPage';
 import { VendorVehicleGenerate3dPage } from './features/vehicle-3d/routes/VendorVehicleGenerate3dPage';
@@ -52,6 +55,8 @@ function App() {
       <Route path="/vehicles" element={<MainLayout><CatalogPage /></MainLayout>} />
       <Route path="/vehicles/:id" element={<MainLayout><VehicleDetailPage /></MainLayout>} />
       <Route path="/vehicles/:id/3d" element={<MainLayout><VehiclePublic3dPage /></MainLayout>} />
+      <Route path="/vendors/:accountId" element={<MainLayout><PublicVendorPage /></MainLayout>} />
+      <Route path="/users/:accountId" element={<MainLayout><PublicUserPage /></MainLayout>} />
       <Route path="/local-3d" element={<MainLayout><LocalModelPreviewPage /></MainLayout>} />
 
       {/* User */}
@@ -81,6 +86,7 @@ function App() {
       <Route path="/admin/vendors" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><VendorRequestsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><ReportsManagementPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/admin/accounts" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><AccountsManagementPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/admin/print-requests" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><PrintRequestsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/admin/messages" element={<ProtectedRoute><RoleProtectedRoute role="ADMIN"><DashboardLayout><AdminMessagesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
 
       {/* Catch-all */}

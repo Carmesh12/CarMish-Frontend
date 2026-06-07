@@ -16,7 +16,9 @@ export const signupUserSchema = z.object({
   password: z.string().min(8, "auth.passwordMinLength").max(128),
   firstName: z.string().min(1, "common.required").max(100),
   lastName: z.string().min(1, "common.required").max(100),
-  phoneNumber: z.string().max(32).optional().or(z.literal("")),
+  phoneNumber: z.string().trim().min(1, "common.required").max(32),
+  city: z.string().trim().min(1, "common.required").max(100),
+  address: z.string().max(500).optional().or(z.literal("")),
 });
 
 export const signupVendorSchema = z.object({

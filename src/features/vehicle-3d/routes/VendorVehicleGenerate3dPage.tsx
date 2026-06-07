@@ -1,16 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Printer, Upload } from "lucide-react";
 import {
   vehicle3dApi,
   type ThreeDGenerationConfig,
   type ThreeDJobStatusResponse,
 } from "../api/vehicle3dApi";
 import { LocalModelViewer } from "../../3dgeneration";
+import {
+  detectVehicleIn3dImages,
+  formatVehicleDetectionError,
+} from "../utils/clientVehicleDetection";
 import { Button } from "../../../components/ui/Button";
 import { Card } from "../../../components/ui/Card";
 import { Spinner } from "../../../components/ui/Spinner";
+import { Textarea } from "../../../components/ui/Textarea";
 import { notifyError, notifySuccess } from "../../../lib/toast";
 
 type Slot = "front" | "left" | "back" | "right";
@@ -40,6 +45,11 @@ export function VendorVehicleGenerate3dPage() {
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [files, setFiles] = useState<Partial<Record<Slot, File>>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [printMessage, setPrintMessage] = useState("");
+  const [requestingPrint, setRequestingPrint] = useState(false);
+  const [validationMessage, setValidationMessage] = useState<string | null>(
+    null,
+  );
   const [jobId, setJobId] = useState<string | null>(null);
   const [job, setJob] = useState<ThreeDJobStatusResponse | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -123,7 +133,7 @@ export function VendorVehicleGenerate3dPage() {
       mockMode ? 800 : 2500,
     );
     return () => stopPoll();
-  }, [vehicleId, jobId, stopPoll, mockMode]);
+  }, [vehicleId, jobId, stopPoll, mockMode, t]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -142,6 +152,7 @@ export function VendorVehicleGenerate3dPage() {
       return;
     }
     setSubmitting(true);
+    setValidationMessage(null);
     setJob(null);
     try {
       let res: { jobId: string };
@@ -160,6 +171,24 @@ export function VendorVehicleGenerate3dPage() {
           notifyError(t("threeD.needFour", "Please upload all four views."));
           return;
         }
+        setValidationMessage(
+          t("threeD.detectingCar", "Checking if the images show a car..."),
+        );
+        const detection = await detectVehicleIn3dImages({
+          front,
+          left,
+          back,
+          right,
+        });
+        if (!detection.valid) {
+          const message = formatVehicleDetectionError(detection);
+          setValidationMessage(message);
+          notifyError(message);
+          return;
+        }
+        setValidationMessage(
+          t("threeD.carDetected", "Car detected. Starting generation..."),
+        );
         res = await vehicle3dApi.createVendorJob(vehicleId, {
           front,
           left,
@@ -172,6 +201,7 @@ export function VendorVehicleGenerate3dPage() {
         id: res.jobId,
         status: "PENDING",
         errorMessage: null,
+        modelId: null,
         modelUrl: null,
       });
       console.info("[3D] job created", {
@@ -192,6 +222,23 @@ export function VendorVehicleGenerate3dPage() {
       notifyError(err instanceof Error ? err.message : "Request failed");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function requestPrint(vehicle3DModelId: string) {
+    if (requestingPrint) return;
+    setRequestingPrint(true);
+    try {
+      await vehicle3dApi.createPrintRequest({
+        vehicle3DModelId,
+        message: printMessage.trim() || undefined,
+      });
+      setPrintMessage("");
+      notifySuccess(t("printRequests.requestSuccess"));
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : t("printRequests.requestError"));
+    } finally {
+      setRequestingPrint(false);
     }
   }
 
@@ -304,6 +351,9 @@ export function VendorVehicleGenerate3dPage() {
                   ? t("threeD.submitMock", "Upload model")
                   : t("threeD.submit", "Start generation")}
               </Button>
+              {validationMessage && (
+                <p className="text-xs text-mesh-muted">{validationMessage}</p>
+              )}
             </form>
           </>
         )}
@@ -332,6 +382,33 @@ export function VendorVehicleGenerate3dPage() {
               <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
                 <LocalModelViewer src={job.modelUrl} />
               </div>
+              {job.modelId && (
+                <div className="rounded-[var(--radius-mesh-sm)] border border-mesh-border bg-white/[0.02] p-4 space-y-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-mesh-text flex items-center gap-2">
+                      <Printer size={16} className="text-mesh-gold" />
+                      {t("printRequests.requestTitle")}
+                    </h3>
+                    <p className="mt-1 text-xs text-mesh-muted">
+                      {t("printRequests.listingRequestDescription")}
+                    </p>
+                  </div>
+                  <Textarea
+                    label={t("printRequests.messageToAdmin")}
+                    placeholder={t("printRequests.messagePlaceholder")}
+                    value={printMessage}
+                    onChange={(event) => setPrintMessage(event.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    loading={requestingPrint}
+                    onClick={() => requestPrint(job.modelId!)}
+                  >
+                    <Printer size={16} />
+                    {t("printRequests.requestButton")}
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </Card>

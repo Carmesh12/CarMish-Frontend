@@ -22,7 +22,9 @@ import { Badge } from '../../../components/ui/Badge';
 const profileSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.string().trim().min(1, 'common.required').max(32),
+  city: z.string().trim().min(1, 'common.required').max(100),
+  address: z.string().max(500).optional(),
 });
 type ProfileForm = z.infer<typeof profileSchema>;
 
@@ -57,6 +59,8 @@ export function UserProfilePage() {
           firstName: p.firstName,
           lastName: p.lastName,
           phoneNumber: p.phoneNumber ?? '',
+          city: p.city ?? '',
+          address: p.address ?? '',
         });
       })
       .catch((e: unknown) => {
@@ -90,6 +94,8 @@ export function UserProfilePage() {
         firstName: updated.firstName,
         lastName: updated.lastName,
         phoneNumber: updated.phoneNumber ?? '',
+        city: updated.city ?? '',
+        address: updated.address ?? '',
       });
       notifySuccess(t('profile.updateSuccess'));
     } catch (err: unknown) {
@@ -186,12 +192,25 @@ export function UserProfilePage() {
               {...profileForm.register('lastName')}
             />
           </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input
+              label={t('auth.phoneNumber')}
+              type="tel"
+              error={profileForm.formState.errors.phoneNumber?.message ? t(profileForm.formState.errors.phoneNumber.message) : undefined}
+              {...profileForm.register('phoneNumber')}
+            />
+            <Input
+              label={t('profile.city', 'City')}
+              placeholder={t('catalog.cityPlaceholder', 'e.g. Amman')}
+              error={profileForm.formState.errors.city?.message ? t(profileForm.formState.errors.city.message) : undefined}
+              {...profileForm.register('city')}
+            />
+          </div>
           <Input
-            label={t('auth.phoneNumber')}
-            type="tel"
+            label={t('profile.address', 'Address')}
             placeholder={t('common.optional')}
-            error={profileForm.formState.errors.phoneNumber?.message}
-            {...profileForm.register('phoneNumber')}
+            error={profileForm.formState.errors.address?.message}
+            {...profileForm.register('address')}
           />
           <Button type="submit" loading={profileForm.formState.isSubmitting}>
             <Save size={16} />

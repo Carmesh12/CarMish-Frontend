@@ -1,8 +1,16 @@
 import { authFormData, authJson } from '../../../lib/api';
-import type { UserDashboardResponse, UserProfileResponse } from '../types';
+import type {
+  PublicUserProfileResponse,
+  UserDashboardResponse,
+  UserProfileResponse,
+} from '../types';
 
 export function getUserProfile() {
   return authJson<UserProfileResponse>('/user/profile');
+}
+
+export function getPublicUserProfile(accountId: string) {
+  return authJson<PublicUserProfileResponse>(`/users/${accountId}`);
 }
 
 export function getUserDashboard() {
@@ -10,9 +18,11 @@ export function getUserDashboard() {
 }
 
 export function patchUserProfile(body: {
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  city: string;
+  address?: string;
 }) {
   return authJson<UserProfileResponse>('/user/profile', {
     method: 'PATCH',
