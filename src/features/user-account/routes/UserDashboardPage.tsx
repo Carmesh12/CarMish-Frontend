@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, User, Heart, ShoppingCart, CalendarDays, Box, Printer } from 'lucide-react';
+import { LayoutDashboard, User, Heart, ShoppingCart, CalendarDays, Box, Printer, Wrench } from 'lucide-react';
 import { getUserDashboard } from '../api/userProfileApi';
 import type { UserDashboardResponse } from '../types';
 import { resolveMediaUrl } from '../../../lib/api';
@@ -211,6 +211,12 @@ export function UserDashboardPage() {
                 <div className="flex flex-wrap gap-2">
                   <Link to={`/local-3d?src=${encodeURIComponent(m.modelUrl)}`}>
                     <Button variant="ghost" size="sm">{t('threeD.openPreview', 'Open preview')}</Button>
+                  </Link>
+                  <Link to={`/user/personal-3d/${m.id}/edit-car`}>
+                    <Button variant="ghost" size="sm">
+                      <Wrench size={14} />
+                      {t('wheelEditor.editCar', 'Edit car')}
+                    </Button>
                   </Link>
                   <Button
                     variant="secondary"

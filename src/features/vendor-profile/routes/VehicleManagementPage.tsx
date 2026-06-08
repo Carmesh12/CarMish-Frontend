@@ -10,6 +10,7 @@ import {
   EyeOff,
   Pencil,
   Plus,
+  Wrench,
 } from "lucide-react";
 import { vehiclesApi } from "../../vehicles/api/vehiclesApi";
 import type { Vehicle } from "../../vehicles/types";
@@ -363,6 +364,15 @@ export function VehicleManagementPage() {
                               title={t("threeD.generate", "3D")}
                             >
                               <Box size={14} />
+                            </Button>
+                          </Link>
+                          <Link to={`/vendor/vehicles/${v.id}/edit-car`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title={t("wheelEditor.editCar", "Edit car")}
+                            >
+                              <Wrench size={14} />
                             </Button>
                           </Link>
                           <Link to={`/vendor/vehicles/${v.id}/edit`}>

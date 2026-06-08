@@ -36,6 +36,7 @@ import { LocalModelPreviewPage } from './features/3dgeneration';
 import { VehiclePublic3dPage } from './features/vehicle-3d/routes/VehiclePublic3dPage';
 import { VendorVehicleGenerate3dPage } from './features/vehicle-3d/routes/VendorVehicleGenerate3dPage';
 import { UserPersonal3dPage } from './features/vehicle-3d/routes/UserPersonal3dPage';
+import { WheelEditorPage } from './features/vehicle-3d-wheel-editor/routes/WheelEditorPage';
 import { VendorMessagesPage } from './features/messaging/routes/VendorMessagesPage';
 import { AdminMessagesPage } from './features/messaging/routes/AdminMessagesPage';
 import { UserMessagesPage } from './features/messaging/routes/UserMessagesPage';
@@ -66,6 +67,7 @@ function App() {
       <Route path="/user/purchases" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserPurchasesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/rentals" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserRentalsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/personal-3d" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserPersonal3dPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/user/personal-3d/:modelId/edit-car" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><WheelEditorPage mode="personal" /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/chat" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><ChatbotPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/user/messages" element={<ProtectedRoute><RoleProtectedRoute role="USER"><DashboardLayout><UserMessagesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
 
@@ -76,6 +78,7 @@ function App() {
       <Route path="/vendor/vehicles/new" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VehicleFormPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/vehicles/:id/edit" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VehicleFormPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/vehicles/:id/generate-3d" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorVehicleGenerate3dPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
+      <Route path="/vendor/vehicles/:id/edit-car" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><WheelEditorPage mode="vendor" /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/purchases" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorPurchasesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/rentals" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorRentalsPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
       <Route path="/vendor/messages" element={<ProtectedRoute><RoleProtectedRoute role="VENDOR"><DashboardLayout><VendorMessagesPage /></DashboardLayout></RoleProtectedRoute></ProtectedRoute>} />
